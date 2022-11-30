@@ -5,7 +5,7 @@ import ComponetsContainer from "./components/ComponetsContainer";
 
 function App() {
   return (
-    <div className="container mx-auto">
+    <div className="container-fluid mx-auto">
       <BrowserRouter>
         <RenderOnAnonymous>
           <h1>WELCOME</h1>
