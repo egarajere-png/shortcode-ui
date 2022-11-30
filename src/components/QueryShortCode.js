@@ -6,20 +6,20 @@ import axios from 'axios';
 
 import URLConstants from '../urlsConfig';
 
-function RequestShortCode() {
+function QueryShortCode() {
   const authedAxios = HttpService.getAxiosClient();
 
 
   const [loading, setLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("Submiting request")
   const [accountLookupResponse, setAccountLookupResponse] = useState({
-    "accountNumber": "001190001000200",
-    "accountName": "ELIZABETH WANJIKU KIMANI",
-    "custId": "001040981",
-    "idNumber": "13457213",
-    "phoneNumber": "254721642625",
-    "emailAddress": "lizkimaniw@gmail.com",
-    "accountStatus": "A"
+    "accountNumber": "",
+    "accountName": "",
+    "custId": "",
+    "idNumber": "",
+    "phoneNumber": "",
+    "emailAddress": "",
+    "accountStatus": ""
   })
 
   const [initiatePayload, setInitiatePayload] = useState({
@@ -39,18 +39,18 @@ function RequestShortCode() {
   })
 
   //handle account look up
-  const handleCustomerLookUp = (e) => {
+  const handleShortCodeLookUp = (e) => {
     e.preventDefault();
     setLoading(true)
-    authedAxios.get(`${URLConstants.baseAPIURL}/${URLConstants.validateEndpointURL(e.target.account.value)}`, { timeout: 5000 })
+    authedAxios.get(`${URLConstants.baseAPIURL}/${URLConstants.getShortCodeAccountDetailsURL(e.target.account.value)}`, { timeout: 5000 })
       .then(function (response) {
         console.log(response.data)
         setLoading(false);
         const data = response.data;
-        if (data?.accountStatus) {
-          setAccountLookupResponse(data)
+        if (data?.id) {
+          setAccountLookupResponse(data);
         } else {
-          alert("Could not get that account number")
+          alert("Could not get short code details")
         }
       })
       .catch(function (error) {
@@ -61,85 +61,51 @@ function RequestShortCode() {
           alert("Query took longer than expected. Try again");
           return
         }
-        alert("Could not get that account number")
-      });
-  }
-
-
-  const handleShortCodeRequest = () => {
-    setLoadingMessage("Submiting shortcode request");
-    setLoading(true)
-    const payload = {
-      "accountName": accountLookupResponse?.accountName,
-      "accountNumber": accountLookupResponse?.accountNumber,
-      "approved": false,
-      "approver": UserService.getUsername(),
-      "custId": accountLookupResponse?.custId,
-      "dateApproved": new Date(),
-      "dateInitiated": new Date(),
-      "emailAddress": accountLookupResponse?.emailAddress,
-      "id": 0,
-      "idNumber": accountLookupResponse?.idNumber,
-      "initiator": UserService.getUsername(),
-      "phoneNumber": accountLookupResponse?.phoneNumber,
-      "shortCode": 0
-    }
-    authedAxios.post(`${URLConstants.baseAPIURL}/${URLConstants.initateValidationURL}`, payload)
-      .then(function (response) {
-        setLoading(false);
-        const data = response.data;
-        if (data?.statusCode === "000") {
-          alert(data?.message)
-        } else {
-          alert("Failed to submit request")
-        }
-      })
-      .catch(function (error) {
-        setLoading(false)
-        setAccountLookupResponse({})
-        if (error.code === 'ECONNABORTED') {
-          alert("Query took longer than expected. Try again");
-          return
-        }
-        alert("Failed to submit request")
+        alert("Could not get short code details")
       });
   }
 
   return (
     <React.Fragment>
       <div className='mb-6'>
-        <form className='w-96' onSubmit={handleCustomerLookUp}>
+        <form className='w-96' onSubmit={handleShortCodeLookUp}>
           <div className="my-2">
             <label for="account" className="block mb-2 text-sm font-medium text-gray-900">Enter Customer Account</label>
             <input type="text" id="account" name='account' className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required />
           </div>
-          <button type="submit" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center">Query Account</button>
+          <button type="submit" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center">Query Short Code</button>
         </form>
       </div>
       {loading && <Loading message={loadingMessage} />}
       <LookupComponent account={accountLookupResponse} />
-      <button onClick={handleShortCodeRequest} type="button" class="text-white bg-blue-700
-       hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 
-       font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 inline-flex items-center my-4
-        ">
-        Request For ShortCode
-      </button>
     </React.Fragment>
   )
 }
 
 
-export default RequestShortCode
+export default QueryShortCode
 
 
 const LookupComponent = ({ account }) => {
+  const downloadShortCode = () => {
+    window.open(`${URLConstants.baseURL}/${URLConstants.getReceiptURL(account?.shortCode)}`, '_blank', "height=570,width=520");
+  }
+
   return (
     <div className="shadow-md sm:rounded-lg w-1/2">
       <table className="text-sm text-left text-gray-500 dark:text-gray-400 w-full">
         <caption className="p-5 text-lg font-semibold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-800">
-          Account Details
+          Short Code Details
         </caption>
         <tbody>
+          <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+            <th scope="row" className="py-4 px-6 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+              Short Code:
+            </th>
+            <td className="py-4 px-6">
+              {account?.shortCode}
+            </td>
+          </tr>
           <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
             <th scope="row" className="py-4 px-6 font-medium text-gray-900 whitespace-nowrap dark:text-white">
               Account Name:
@@ -158,14 +124,19 @@ const LookupComponent = ({ account }) => {
           </tr>
           <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
             <th scope="row" className="py-4 px-6 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-              Status
+              Approved By
             </th>
             <td className="py-4 px-6">
-              {account?.accountStatus}
+              {account?.approver}
             </td>
           </tr>
         </tbody>
       </table>
+      <div className="bg-gray-200 px-4 py-3 text-right">
+        {
+          account?.shortCode && <button onClick={downloadShortCode} type="button" className="py-2 px-4 bg-gray-500 text-white rounded hover:bg-gray-700 mr-2">Download ShortCode Details</button>
+        }
+      </div>
     </div>
   )
 }

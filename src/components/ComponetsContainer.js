@@ -1,6 +1,8 @@
 import React from 'react'
 import { Route, Routes } from 'react-router-dom'
 import ComponentWithAsideBar from './ComponentWithAsideBar'
+import PendingRequests from './PendingRequests'
+import QueryShortCode from './QueryShortCode'
 import RequestShortCode from './RequestShortCode'
 
 function ComponetsContainer() {
@@ -12,6 +14,12 @@ function ComponetsContainer() {
         </ComponentWithAsideBar>} />
         <Route exact path="/" element={<ComponentWithAsideBar>
           <RequestShortCode />
+        </ComponentWithAsideBar>} />
+        <Route exact path="/pending" element={<ComponentWithAsideBar>
+          <PendingRequests />
+        </ComponentWithAsideBar>} />
+        <Route exact path="/query" element={<ComponentWithAsideBar>
+          <QueryShortCode />
         </ComponentWithAsideBar>} />
       </Routes>
       {/* </Switch> */}
