@@ -11,7 +11,7 @@ function ComponentWithAsideBar({ children }) {
                 <div className="basis-1/5">
                     <Aside />
                 </div>
-                <div className="basis-4/5">
+                <div className="basis-4/5 p-6">
                     {children}
                 </div>
             </div>
