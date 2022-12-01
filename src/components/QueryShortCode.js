@@ -91,6 +91,14 @@ const LookupComponent = ({ account }) => {
           </tr>
           <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
             <th scope="row" className="py-4 px-6 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+              Sequence Number:
+            </th>
+            <td className="py-4 px-6">
+              {account?.sequenceNumber}
+            </td>
+          </tr>
+          <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+            <th scope="row" className="py-4 px-6 font-medium text-gray-900 whitespace-nowrap dark:text-white">
               Account Name:
             </th>
             <td className="py-4 px-6">
