@@ -1,0 +1,12 @@
+version: '3.7'
+
+services:
+
+  shortcodes-portal-uat:
+    container_name: shortcodes-portal
+    restart: always
+    build:
+      context: .
+      dockerfile: DockerFile
+    ports:
+      - '8088:80'
