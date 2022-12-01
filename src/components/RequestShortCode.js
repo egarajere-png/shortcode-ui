@@ -2,8 +2,6 @@ import React, { useState } from 'react'
 import Loading from './loading/Loading';
 import HttpService from '../services/HttpService';
 import UserService from '../services/UserService';
-import axios from 'axios';
-
 import URLConstants from '../urlsConfig';
 
 function RequestShortCode() {
@@ -13,36 +11,20 @@ function RequestShortCode() {
   const [loading, setLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("Submiting request")
   const [accountLookupResponse, setAccountLookupResponse] = useState({
-    "accountNumber": "001190001000200",
-    "accountName": "ELIZABETH WANJIKU KIMANI",
-    "custId": "001040981",
-    "idNumber": "13457213",
-    "phoneNumber": "254721642625",
-    "emailAddress": "lizkimaniw@gmail.com",
-    "accountStatus": "A"
-  })
-
-  const [initiatePayload, setInitiatePayload] = useState({
-    "accountName": accountLookupResponse?.accountName,
-    "accountNumber": accountLookupResponse?.accountNumber,
-    "approved": false,
-    "approver": UserService.getUsername(),
-    "custId": accountLookupResponse?.custId,
-    "dateApproved": new Date(),
-    "dateInitiated": new Date(),
-    "emailAddress": accountLookupResponse?.emailAddress,
-    "id": 0,
-    "idNumber": accountLookupResponse?.idNumber,
-    "initiator": UserService.getUsername(),
-    "phoneNumber": accountLookupResponse?.phoneNumber,
-    "shortCode": 0
+    "accountNumber": "",
+    "accountName": "",
+    "custId": "",
+    "idNumber": "",
+    "phoneNumber": "",
+    "emailAddress": "",
+    "accountStatus": ""
   })
 
   //handle account look up
   const handleCustomerLookUp = (e) => {
     e.preventDefault();
     setLoading(true)
-    authedAxios.get(`${URLConstants.baseAPIURL}/${URLConstants.validateEndpointURL(e.target.account.value)}`, { timeout: 5000 })
+    authedAxios.get(`${URLConstants.baseAPIURL}/${URLConstants.validateEndpointURL(e.target.account.value)}`, { timeout: 10000 })
       .then(function (response) {
         console.log(response.data)
         setLoading(false);
@@ -117,13 +99,18 @@ function RequestShortCode() {
         </form>
       </div>
       {loading && <Loading message={loadingMessage} />}
-      <LookupComponent account={accountLookupResponse} />
-      <button onClick={handleShortCodeRequest} type="button" class="text-white bg-blue-700
+      {accountLookupResponse?.accountStatus &&
+        <React.Fragment>
+          <LookupComponent account={accountLookupResponse} />
+          <button onClick={handleShortCodeRequest} type="button" class="text-white bg-blue-700
        hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 
        font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 inline-flex items-center my-4
         ">
-        Request For ShortCode
-      </button>
+            Request For ShortCode
+          </button>
+        </React.Fragment>
+      }
+
     </React.Fragment>
   )
 }

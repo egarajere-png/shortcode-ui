@@ -4,42 +4,34 @@ import HttpService from '../services/HttpService';
 
 import URLConstants from '../urlsConfig';
 
-function QueryShortCode() {
+function QueryAccountShortCode() {
   const authedAxios = HttpService.getAxiosClient();
 
 
   const [loading, setLoading] = useState(false);
   const [loadingMessage,] = useState("Submiting request")
-  const [accountLookupResponse, setAccountLookupResponse] = useState({
-    "accountNumber": "",
-    "accountName": "",
-    "custId": "",
-    "idNumber": "",
-    "phoneNumber": "",
-    "emailAddress": "",
-    "accountStatus": ""
-  })
+  const [accountLookupResponse, setAccountLookupResponse] = useState([])
 
   //handle account look up
   const handleShortCodeLookUp = (e) => {
     e.preventDefault();
     setLoading(true)
-    authedAxios.get(`${URLConstants.baseAPIURL}/${URLConstants.getShortCodeAccountDetailsURL(e.target.account.value)}`, { timeout: 10000 })
+    authedAxios.get(`${URLConstants.baseAPIURL}/${URLConstants.getAccountShortCodesURL(e.target.account.value)}`, { timeout: 10000 })
       .then(function (response) {
         console.log(response.data)
         setLoading(false);
         const data = response.data;
-        if (data?.id) {
+        if (data[0]?.id) {
           setAccountLookupResponse(data);
         } else {
           alert("Could not get short code details")
-          setAccountLookupResponse({});
+          setAccountLookupResponse([])
         }
       })
       .catch(function (error) {
         console.log(error)
         setLoading(false)
-        setAccountLookupResponse({})
+        setAccountLookupResponse([])
         if (error.code === 'ECONNABORTED') {
           alert("Query took longer than expected. Try again");
           return
@@ -53,20 +45,24 @@ function QueryShortCode() {
       <div className='mb-6'>
         <form className='w-96' onSubmit={handleShortCodeLookUp}>
           <div className="my-2">
-            <label for="account" className="block mb-2 text-sm font-medium text-gray-900">Enter Short Code</label>
+            <label for="account" className="block mb-2 text-sm font-medium text-gray-900">Enter Account Number</label>
             <input type="text" id="account" name='account' className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required />
           </div>
-          <button type="submit" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center">Query Short Code</button>
+          <button type="submit" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center">Query Account Short Codes</button>
         </form>
       </div>
       {loading && <Loading message={loadingMessage} />}
-      {accountLookupResponse?.shortCode && <LookupComponent account={accountLookupResponse} />}
+      {accountLookupResponse[0]?.shortCode &&
+        <div className='flex flex-row flex-wrap'>
+          { accountLookupResponse.map(response => <LookupComponent account={response} />) }
+        </div>
+      }
     </React.Fragment>
   )
 }
 
 
-export default QueryShortCode
+export default QueryAccountShortCode
 
 
 const LookupComponent = ({ account }) => {
@@ -75,7 +71,7 @@ const LookupComponent = ({ account }) => {
   }
 
   return (
-    <div className="shadow-md sm:rounded-lg w-1/2">
+    <div className="shadow-md sm:rounded-lg w-1/2 px-4 py-4">
       <table className="text-sm text-left text-gray-500 dark:text-gray-400 w-full">
         <caption className="p-5 text-lg font-semibold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-800">
           Short Code Details
@@ -115,7 +111,7 @@ const LookupComponent = ({ account }) => {
           </tr>
           <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
             <th scope="row" className="py-4 px-6 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-              Approved By
+              Date Approved
             </th>
             <td className="py-4 px-6">
               {account?.dateApproved}

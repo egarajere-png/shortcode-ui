@@ -23,6 +23,10 @@ const getReceiptURL = (shortcode) => {
     return `shortcodes/print/${shortcode}`;
 }
 
+const getAccountShortCodesURL = (account) => {
+    return `get-shortcodes/${account}`
+}
+
 const URLConstants = {
     baseAPIURL,
     baseURL,
@@ -32,7 +36,8 @@ const URLConstants = {
     approveURL,
     getShortCodeAccountDetailsURL,
     shortCodeAccountURL,
-    getReceiptURL
+    getReceiptURL,
+    getAccountShortCodesURL
 }
 export default URLConstants
 
