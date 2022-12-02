@@ -11,7 +11,7 @@ function ComponetsContainer() {
     <div>
       <Routes>
         <Route exact path="*" element={<ComponentWithAsideBar>
-          <h1>THIS IS A SAMPLE ROUTE</h1>
+          <RequestShortCode />
         </ComponentWithAsideBar>} />
         <Route exact path="/" element={<ComponentWithAsideBar>
           <RequestShortCode />
