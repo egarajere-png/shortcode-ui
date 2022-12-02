@@ -64,8 +64,10 @@ function RequestShortCode() {
       "idNumber": accountLookupResponse?.idNumber,
       "initiator": UserService.getUsername(),
       "phoneNumber": accountLookupResponse?.phoneNumber,
-      "shortCode": 0
+      "shortCode": 0,
+      "sequenceNumber": 0,
     }
+    
     authedAxios.post(`${URLConstants.baseAPIURL}/${URLConstants.initateValidationURL}`, payload)
       .then(function (response) {
         setLoading(false);
