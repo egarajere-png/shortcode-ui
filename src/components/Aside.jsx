@@ -14,17 +14,23 @@ function Aside() {
               <span className="flex-1 ml-3 whitespace-nowrap"><b>Manage Shortcodes</b></span>
             </div>
           </li>
-          <RenderOnRole roles={['checker']}>
+          <RenderOnRole roles={['maker']}>
             <li>
               <Link to="/" className="flex items-center p-2 text-base font-normal text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700" >
                 <span className="flex-1 ml-3 whitespace-nowrap">Request Short Code</span>
               </Link>
             </li>
+          </RenderOnRole>
+          <RenderOnRole roles={['checker']}>
+
             <li>
               <Link to="/pending" className="flex items-center p-2 text-base font-normal text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700" >
                 <span className="flex-1 ml-3 whitespace-nowrap">Pending Approvals</span>
               </Link>
             </li>
+          </RenderOnRole>
+          <RenderOnRole roles={['maker', 'checker']}>
+
             <li>
               <Link to="/query" className="flex items-center p-2 text-base font-normal text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700" >
                 <span className="flex-1 ml-3 whitespace-nowrap">Query Short Code</span>

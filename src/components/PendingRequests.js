@@ -3,6 +3,8 @@ import URLConstants from '../urlsConfig';
 import Loading from './loading/Loading';
 import HttpService from '../services/HttpService';
 import UserService from '../services/UserService';
+import { useNavigate } from 'react-router-dom';
+
 
 function PendingRequests() {
 
@@ -12,6 +14,7 @@ function PendingRequests() {
     const [viewItem, setViewItem] = React.useState([])
 
     const authedAxios = HttpService.getAxiosClient();
+
 
     const showModal = (item) => {
         document.getElementById('modal').classList.toggle('hidden')
@@ -35,6 +38,20 @@ function PendingRequests() {
                     return
                 }
                 alert("Could not get that account number")
+            });
+    }
+
+
+    const getPendingv2 = () => {
+        authedAxios.get(`${URLConstants.baseAPIURL}/${URLConstants.pendingRequestURL}`, { timeout: 5000 })
+            .then(function (response) {
+                const data = response.data;
+                setPending(data)
+            })
+            .catch(function (error) {
+                if (error.code === 'ECONNABORTED') {
+                    return
+                }
             });
     }
 
@@ -103,7 +120,7 @@ const EslipModal = ({ payload }) => {
     const [shortCodeResponse, setShortCodeResponse] = useState({})
 
     const authedAxios = HttpService.getAxiosClient();
-
+    const navigate = useNavigate();
 
     const toggleModal = () => {
         document.getElementById('modal').classList.toggle('hidden')
@@ -130,6 +147,7 @@ const EslipModal = ({ payload }) => {
                     setShortCodeResponse(data)
                     showDownloadView(true);
                     alert("Short code generated successfully. Click okay to download")
+                    navigate("/pending")
                 } else {
                     alert("Failed to approve shortcode")
                 }
