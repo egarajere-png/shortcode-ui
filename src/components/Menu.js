@@ -5,7 +5,7 @@ function Menu() {
     return (
         <nav className="bg-gray-400 border-gray-200 px-12">
             <div className="container flex flex-wrap justify-between items-center mx-auto">
-                <a href="https://abcthebank.com" className="flex items-center">
+                <a href="https://abcthebank.com" target="_blank" rel='noreferrer' className="flex items-center">
                     <img src="/abc-logo.png" className="mr-6 h-12 sm:h-9" alt="abc logo" />
                     <span className="self-center text-xl font-semibold whitespace-nowrap">
                         Shortcodes Portal
@@ -41,7 +41,6 @@ function Menu() {
                                 </li>
                             )
                         }
-
                     </ul>
                 </div>
             </div>

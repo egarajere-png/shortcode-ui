@@ -106,14 +106,14 @@ function PendingRequests() {
                     </tbody>
                 </table>
             </div>
-            <EslipModal payload={viewItem} />
+            <EslipModal payload={viewItem} getPending={getPendingv2} />
             {/* <Loading message={loadingMessage} /> */}
         </div>
     )
 }
 
 
-const EslipModal = ({ payload }) => {
+const EslipModal = ({ payload,getPending }) => {
     const [loading, setLoading] = React.useState(false)
     const [message, setMessage] = React.useState("")
     const [downloadView, showDownloadView] = React.useState(false);
@@ -148,6 +148,7 @@ const EslipModal = ({ payload }) => {
                     showDownloadView(true);
                     alert("Short code generated successfully. Click okay to download")
                     navigate("/pending")
+                    getPending()
                 } else {
                     alert("Failed to approve shortcode")
                 }
@@ -162,6 +163,7 @@ const EslipModal = ({ payload }) => {
                 alert("Failed to submit request")
             });
         setLoading(false)
+
     }
 
     return (

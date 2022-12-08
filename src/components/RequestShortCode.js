@@ -7,7 +7,6 @@ import URLConstants from '../urlsConfig';
 function RequestShortCode() {
   const authedAxios = HttpService.getAxiosClient();
 
-
   const [loading, setLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("Submiting request")
   const [accountLookupResponse, setAccountLookupResponse] = useState({
@@ -75,7 +74,7 @@ function RequestShortCode() {
         if (data?.statusCode === "000") {
           alert(data?.message)
         } else {
-          alert("Failed to submit request")
+          alert("Failed to submit request: " + data?.message)
         }
       })
       .catch(function (error) {
