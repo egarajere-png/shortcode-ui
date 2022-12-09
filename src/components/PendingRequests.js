@@ -10,7 +10,7 @@ function PendingRequests() {
 
     const [pending, setPending] = useState();
     const [loading, setLoading] = useState();
-    const [loadingMessage,] = useState("Loading Pending Requests");
+    //const [loadingMessage,] = useState("Loading Pending Requests");
     const [viewItem, setViewItem] = React.useState([])
 
     const authedAxios = HttpService.getAxiosClient();
@@ -19,7 +19,6 @@ function PendingRequests() {
     const showModal = (item) => {
         document.getElementById('modal').classList.toggle('hidden')
         setViewItem(item)
-        console.log(item)
     }
 
     const getPending = () => {
@@ -113,7 +112,7 @@ function PendingRequests() {
 }
 
 
-const EslipModal = ({ payload,getPending }) => {
+const EslipModal = ({ payload, getPending }) => {
     const [loading, setLoading] = React.useState(false)
     const [message, setMessage] = React.useState("")
     const [downloadView, showDownloadView] = React.useState(false);
