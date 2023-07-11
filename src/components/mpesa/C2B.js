@@ -71,8 +71,8 @@ const C2B = () => {
 
     return (
         <div>
-            <h1 className="text-1xl my-3 font-extrabold max-w-md mx-auto">Simulate Customer to Busines Transactions</h1>
-            <form onSubmit={handleSubmit} className="max-w-md mx-auto">
+            <h1 className="text-1xl my-3 font-extrabold max-w-md">Simulate Customer to Busines Transactions</h1>
+            <form onSubmit={handleSubmit} className="max-w-md">
                 <div className="mb-4">
                     <label htmlFor="phone_number" className="block mb-2 font-medium text-gray-700">Phone Number</label>
                     <input
@@ -110,7 +110,7 @@ const C2B = () => {
                         className="w-full px-3 py-2 border rounded-md focus:outline-none focus:border-blue-500"
                     />
                 </div>
-                <div className="mb-4">
+                <div className="mb-4 hidden">
                     <label htmlFor="shortcode" className="block mb-2 font-medium text-gray-700">Shortcode</label>
                     <input
                         type="number"

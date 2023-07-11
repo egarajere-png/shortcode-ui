@@ -72,8 +72,8 @@ const B2C = () => {
 
     return (
         <div>
-            <h1 className="text-1xl my-3 font-extrabold max-w-md mx-auto">Simulate Business to Customer Transaction</h1>
-            <form onSubmit={handleSubmit} className="max-w-md mx-auto">
+            <h1 className="text-1xl my-3 font-extrabold max-w-md">Simulate Business to Customer Transaction</h1>
+            <form onSubmit={handleSubmit} className="max-w-md ">
                 <div className="mb-4">
                     <label htmlFor="channel_id" className="block mb-2 font-medium text-gray-700">Channel ID</label>
                     <input
