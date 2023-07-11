@@ -5,7 +5,9 @@ WORKDIR /app
 # Copy all files from current directory to working dir in image
 COPY . .
 # install node modules and build assets
-RUN yarn install && yarn build:staging
+# RUN yarn install && yarn build:staging 
+
+# skip this stage and perform build locally to avoid requiring internet access now and then 
 
 # nginx state for serving content
 FROM nginx:alpine

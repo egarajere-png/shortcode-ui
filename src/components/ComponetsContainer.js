@@ -5,6 +5,8 @@ import PendingRequests from './PendingRequests'
 import QueryAccountShortCode from './QueryAccountShortCode'
 import QueryShortCode from './QueryShortCode'
 import RequestShortCode from './RequestShortCode'
+import B2C from './mpesa/B2C'
+import C2B from './mpesa/C2B'
 
 function ComponetsContainer() {
   return (
@@ -24,6 +26,12 @@ function ComponetsContainer() {
         </ComponentWithAsideBar>} />
         <Route exact path="/query/account" element={<ComponentWithAsideBar>
           <QueryAccountShortCode />
+        </ComponentWithAsideBar>} />
+        <Route exact path="/c2b" element={<ComponentWithAsideBar>
+          <C2B />
+        </ComponentWithAsideBar>} />
+        <Route exact path="b2c" element={<ComponentWithAsideBar>
+          <B2C />
         </ComponentWithAsideBar>} />
       </Routes>
       {/* </Switch> */}
