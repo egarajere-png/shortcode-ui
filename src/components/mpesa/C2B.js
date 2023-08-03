@@ -21,7 +21,7 @@ const C2B = () => {
         let config = {
             method: 'post',
             maxBodyLength: Infinity,
-            url: `${process.env.REACT_APP_MPESA_API_BASE_URL}/auth/django-daraja/auth-token`,
+            url: `${process.env.REACT_APP_MPESA_API_BASE_URL}/mpesa/auth-token`,
             headers: {
                 'Content-Type': 'application/json'
             },
@@ -74,12 +74,12 @@ const C2B = () => {
             <h1 className="text-1xl my-3 font-extrabold max-w-md">Simulate Customer to Busines Transactions</h1>
             <form onSubmit={handleSubmit} className="max-w-md">
                 <div className="mb-4">
-                    <label htmlFor="phone_number" className="block mb-2 font-medium text-gray-700">Phone Number</label>
+                    <label htmlFor="phoneNumber" className="block mb-2 font-medium text-gray-700">Phone Number</label>
                     <input
                         type="text"
-                        id="phone_number"
-                        name="phone_number"
-                        value={formData.phone_number}
+                        id="phoneNumber"
+                        name="phoneNumber"
+                        value={formData.phoneNumber}
                         onChange={handleChange}
                         required
                         className="w-full px-3 py-2 border rounded-md focus:outline-none focus:border-blue-500"
@@ -99,12 +99,12 @@ const C2B = () => {
                     />
                 </div>
                 <div className="mb-4">
-                    <label htmlFor="account" className="block mb-2 font-medium text-gray-700">Account/Customer A/C Short Code</label>
+                    <label htmlFor="accountNumber" className="block mb-2 font-medium text-gray-700">Account/Customer A/C Short Code</label>
                     <input
                         type="text"
-                        id="account"
-                        name="account"
-                        value={formData.account}
+                        id="accountNumber"
+                        name="accountNumber"
+                        value={formData.accountNumber}
                         onChange={handleChange}
                         required
                         className="w-full px-3 py-2 border rounded-md focus:outline-none focus:border-blue-500"

@@ -21,7 +21,7 @@ const B2C = () => {
         let config = {
             method: 'post',
             maxBodyLength: Infinity,
-            url: `${process.env.REACT_APP_MPESA_API_BASE_URL}/auth/django-daraja/auth-token`,
+            url: `${process.env.REACT_APP_MPESA_API_BASE_URL}/mpesa/auth-token`,
             headers: {
                 'Content-Type': 'application/json'
             },
@@ -49,7 +49,7 @@ const B2C = () => {
         setIsLoading(true);
 
         try {
-            const response = await axios.post(`${process.env.REACT_APP_MPESA_API_BASE_URL}/finacle/b2c`, formData, {
+            const response = await axios.post(`${process.env.REACT_APP_MPESA_API_BASE_URL}/mpesa/b2c`, formData, {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
@@ -78,9 +78,9 @@ const B2C = () => {
                     <label htmlFor="channel_id" className="block mb-2 font-medium text-gray-700">Channel ID</label>
                     <input
                         type="number"
-                        id="channel_id"
-                        name="channel_id"
-                        value={formData.channel_id}
+                        id="channelId"
+                        name="channelId"
+                        value={formData.channelId}
                         onChange={handleChange}
                         disabled
                         className="w-full px-3 py-2 border rounded-md focus:outline-none focus:border-blue-500"
@@ -90,9 +90,9 @@ const B2C = () => {
                     <label htmlFor="phone_number" className="block mb-2 font-medium text-gray-700">Phone Number</label>
                     <input
                         type="text"
-                        id="phone_number"
-                        name="phone_number"
-                        value={formData.phone_number}
+                        id="phoneNumber"
+                        name="phoneNumber"
+                        value={formData.phoneNumber}
                         onChange={handleChange}
                         required
                         className="w-full px-3 py-2 border rounded-md focus:outline-none focus:border-blue-500"
@@ -111,12 +111,12 @@ const B2C = () => {
                     />
                 </div>
                 <div className="mb-4">
-                    <label htmlFor="debit_account_no" className="block mb-2 font-medium text-gray-700">Debit Account No</label>
+                    <label htmlFor="debitAccountNo" className="block mb-2 font-medium text-gray-700">Debit Account No</label>
                     <input
                         type="text"
-                        id="debit_account_no"
-                        name="debit_account_no"
-                        value={formData.debit_account_no}
+                        id="debitAccountNo"
+                        name="debitAccountNo"
+                        value={formData.debitAccountNo}
                         onChange={handleChange}
                         required
                         className="w-full px-3 py-2 border rounded-md focus:outline-none focus:border-blue-500"
