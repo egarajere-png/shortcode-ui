@@ -14,7 +14,7 @@ const C2B = () => {
 
     const getBearerToken = () => {
         let data = JSON.stringify({
-            "userName": process.env.REACT_APP_DARAJA_USER,
+            "username": process.env.REACT_APP_DARAJA_USER,
             "password": process.env.REACT_APP_DARAJA_USER_PASSWORD
         });
 
