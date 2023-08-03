@@ -8,6 +8,6 @@ services:
     build:
       context: .
       dockerfile: DockerFile
-    image: shortcodesui:v1
+    image: shortcodesui:v2
     ports:
       - '8084:80'

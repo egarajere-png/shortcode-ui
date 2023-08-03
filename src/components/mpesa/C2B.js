@@ -48,7 +48,7 @@ const C2B = () => {
         setIsLoading(true);
 
         try {
-            const response = await axios.post(`${process.env.REACT_APP_MPESA_API_BASE_URL}/c2b/simulate`, formData, {
+            const response = await axios.post(`${process.env.REACT_APP_MPESA_API_BASE_URL}/mpesa/c2b/simulate`, formData, {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
