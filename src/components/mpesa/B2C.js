@@ -4,10 +4,10 @@ import axios from 'axios';
 const B2C = () => {
     const [token, setToken] = useState("");
     const [formData, setFormData] = useState({
-        channel_id: 1002,
-        phone_number: '',
+        channelId: 1002,
+        phoneNumber: '',
         amount: 100,
-        debit_account_no: '',
+        debitAccountNo: '',
         narration: 'Fees'
     });
     const [submissionResult, setSubmissionResult] = useState(null);

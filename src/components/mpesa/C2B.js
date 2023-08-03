@@ -4,7 +4,7 @@ import axios from 'axios';
 const C2B = () => {
     const [token, setToken] = useState("");
     const [formData, setFormData] = useState({
-        phone_number: '',
+        phoneNumber: '',
         amount: 10,
         account: '',
         shortcode: "600978"
