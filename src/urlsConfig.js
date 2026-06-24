@@ -1,3 +1,7 @@
+export const deleteShortCodeURL = "delete";
+export const pendingDeleteURL = "pending-delete";
+export const approveDeleteURL = "approve-delete";
+
 const baseAPIURL = process.env.REACT_APP_API_BASE_URL
 const baseURL = process.env.REACT_APP_BASE_URL
 const validateEndpointURL = (account) => {
@@ -34,6 +38,11 @@ const URLConstants = {
     initateValidationURL,
     pendingRequestURL,
     approveURL,
+
+    deleteShortCodeURL,
+    pendingDeleteURL,
+    approveDeleteURL,
+
     getShortCodeAccountDetailsURL,
     shortCodeAccountURL,
     getReceiptURL,
