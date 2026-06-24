@@ -2,6 +2,11 @@ import React from 'react'
 import RenderOnRole from './access/RenderOnRole'
 import UserService from '../services/UserService'
 import { Link } from "react-router-dom";
+ 
+
+// neeed to add a svg icon for each of the links in the sidebar. The svg icons can be found in the tailwind documentation. 
+// The svg icons should be placed before the text in each link. The svg icons should have a class of "w-6 h-6
+
 
 function Aside() {
   return (
@@ -20,12 +25,29 @@ function Aside() {
                 <span className="flex-1 ml-3 whitespace-nowrap">Request Short Code</span>
               </Link>
             </li>
+
+            <li>
+              <Link to="/delete" className="flex items-center p-2 text-base font-normal text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
+               
+                <span className="flex-1 ml-3 whitespace-nowrap"> Delete Short Code</span>
+              </Link>
+            </li>
+            <li>
+              <Link to="/test-request" className="flex items-center p-2 text-base font-normal text-gray-900 rounded-lg hover:bg-gray-100" >
+                <span className="flex-1 ml-3 whitespace-nowrap"> Test Short Code Request </span>
+                </Link>
+            </li>
           </RenderOnRole>
           <RenderOnRole roles={['checker']}>
 
             <li>
               <Link to="/pending" className="flex items-center p-2 text-base font-normal text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700" >
                 <span className="flex-1 ml-3 whitespace-nowrap">Pending Approvals</span>
+              </Link>
+            </li>
+            <li>
+              <Link to="/pending-delete" className="flex items-center p-2 text-base font-normal text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
+                <span className="flex-1 ml-3 whitespace-nowrap"> Pending Delete Requests</span>
               </Link>
             </li>
           </RenderOnRole>

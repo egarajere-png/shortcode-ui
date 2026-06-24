@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom';
 function PendingRequests() {
 
     const [pending, setPending] = useState();
-    const [loading, setLoading] = useState();
+    const [loading, setLoading] = useState(false);
     //const [loadingMessage,] = useState("Loading Pending Requests");
     const [viewItem, setViewItem] = React.useState([])
 
@@ -132,38 +132,62 @@ const EslipModal = ({ payload, getPending }) => {
     }
 
     const approveShortCodeRequest = () => {
-        setMessage("Approving shortcode Request");
-        const requestPayload = {
-            "accountNumber": payload?.accountNumber,
-            "approver": UserService.getUsername()
+
+    if (loading) return;
+
+    setLoading(true);
+    setMessage("Approving shortcode Request");
+
+    const requestPayload = {
+        accountNumber: payload?.accountNumber,
+        approver: UserService.getUsername()
+    };
+
+    authedAxios.post(
+        `${URLConstants.baseAPIURL}/${URLConstants.approveURL}`,
+        requestPayload
+    )
+    .then(function (response) {
+
+        const data = response.data;
+
+        if (data.approved) {
+
+            setShortCodeResponse(data);
+            showDownloadView(true);
+
+            alert("Short code generated successfully. Click okay to download");
+
+            navigate("/pending");
+
+            getPending();
+
+        } else {
+
+            alert("Failed to approve shortcode");
+
         }
 
-        authedAxios.post(`${URLConstants.baseAPIURL}/${URLConstants.approveURL}`, requestPayload)
-            .then(function (response) {
-                setLoading(false);
-                const data = response.data;
-                if (data.approved) {
-                    setShortCodeResponse(data)
-                    showDownloadView(true);
-                    alert("Short code generated successfully. Click okay to download")
-                    navigate("/pending")
-                    getPending()
-                } else {
-                    alert("Failed to approve shortcode")
-                }
-            })
-            .catch(function (error) {
-                setLoading(false)
-                setShortCodeResponse({})
-                if (error.code === 'ECONNABORTED') {
-                    alert("Query took longer than expected. Try again");
-                    return
-                }
-                alert("Failed to submit request")
-            });
-        setLoading(false)
+        setLoading(false);
 
-    }
+    })
+    .catch(function (error) {
+
+        setLoading(false);
+        setShortCodeResponse({});
+
+        if (error.code === "ECONNABORTED") {
+
+            alert("Query took longer than expected. Try again");
+            return;
+
+        }
+
+        alert("Failed to submit request");
+
+    });
+
+};
 
     return (
         <React.Fragment>
@@ -205,13 +229,40 @@ const EslipModal = ({ payload, getPending }) => {
                                 </thead>
                             </table>
                         </div>
-                        <div className="bg-gray-200 px-4 py-3 text-right">
-                            <button type="button" className="py-2 px-4 bg-gray-500 text-white rounded hover:bg-gray-700 mr-2" onClick={toggleModal}>Cancel</button>
-                            {downloadView &&
-                                <button onClick={downloadReceipt} type="button" className="py-2 px-4 bg-gray-500 text-white rounded hover:bg-gray-700 mr-2">Download Details</button>
-                            }
-                            <button type="button" className="py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-700 mr-2" onClick={approveShortCodeRequest}>Approve Request</button>
-                        </div>
+                     <div className="bg-gray-200 px-4 py-3 text-right">
+
+    <button
+        type="button"
+        className="py-2 px-4 bg-gray-500 text-white rounded hover:bg-gray-700 mr-2"
+        onClick={toggleModal}
+    >
+        Cancel
+    </button>
+
+    {downloadView &&
+        <button
+            onClick={downloadReceipt}
+            type="button"
+            className="py-2 px-4 bg-gray-500 text-white rounded hover:bg-gray-700 mr-2"
+        >
+            Download Details
+        </button>
+    }
+
+    <button
+        type="button"
+        disabled={loading}
+        className={`py-2 px-4 text-white rounded mr-2 ${
+            loading
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-blue-500 hover:bg-blue-700"
+        }`}
+        onClick={approveShortCodeRequest}
+    >
+        {loading ? "Approving..." : "Approve Request"}
+    </button>
+
+</div>
                     </div>
                 </div>
             </div>

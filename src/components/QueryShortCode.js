@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import Loading from './loading/Loading';
 import HttpService from '../services/HttpService';
+import { useNavigate } from "react-router-dom";
 
 import URLConstants from '../urlsConfig';
 
@@ -56,6 +57,7 @@ function QueryShortCode() {
             <label for="account" className="block mb-2 text-sm font-medium text-gray-900">Enter Short Code</label>
             <input type="text" id="account" name='account' className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required />
           </div>
+          
           <button type="submit" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center">Query Short Code</button>
         </form>
       </div>
@@ -70,6 +72,10 @@ export default QueryShortCode
 
 
 const LookupComponent = ({ account }) => {
+  const navigate = useNavigate();
+  const viewAuditTrail = () => {
+    navigate(`/audit/${account.shortCode}`);
+  };
   const downloadShortCode = () => {
     window.open(`${URLConstants.baseURL}/${URLConstants.getReceiptURL(account?.shortCode)}`, '_blank', "height=570,width=520");
   }
@@ -132,10 +138,24 @@ const LookupComponent = ({ account }) => {
         </tbody>
       </table>
       <div className="bg-gray-200 px-4 py-3 text-right">
-        {
-          account?.shortCode && <button onClick={downloadShortCode} type="button" className="py-2 px-4 bg-gray-500 text-white rounded hover:bg-gray-700 mr-2">Download ShortCode Details</button>
-        }
-      </div>
+
+  <button
+    onClick={viewAuditTrail}
+    type="button"
+    className="py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-700 mr-2"
+  >
+    View Audit Trail
+  </button>
+
+  <button
+    onClick={downloadShortCode}
+    type="button"
+    className="py-2 px-4 bg-gray-500 text-white rounded hover:bg-gray-700 mr-2"
+  >
+    Download ShortCode Details
+  </button>
+
+</div>
     </div>
   )
 }
