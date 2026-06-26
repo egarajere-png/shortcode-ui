@@ -1,70 +1,385 @@
-# Getting Started with Create React App
+# ABC Bank Shortcodes Portal - Frontend
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A modern React-based frontend for the **ABC Bank Shortcodes Management System**.
 
-## Available Scripts
+This application provides an intuitive interface for managing customer M-Pesa shortcodes using a secure **Maker-Checker workflow**.
 
-In the project directory, you can run:
+---
 
-### `yarn start`
+## Features
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- Secure authentication with Keycloak
+- Maker / Checker role-based access
+- Request new shortcodes
+- Approve shortcode requests
+- Request shortcode deletion
+- Approve shortcode deletions
+- Query shortcodes
+- Query customer accounts
+- Audit Trail
+- M-Pesa C2B Simulator
+- M-Pesa B2C Simulator
+- Modern responsive UI
+- Enterprise dashboard
+- Toast notifications
+- Loading indicators
+- Mobile-friendly interface
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+---
 
-### `yarn test`
+# Project Structure
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+```
+src
+├── components
+│   ├── access
+│   ├── layout
+│   ├── loading
+│   ├── mpesa
+│   ├── ui
+│   ├── Dashboard.jsx
+│   ├── RequestShortCode.js
+│   ├── DeleteShortCode.js
+│   ├── PendingRequests.js
+│   ├── PendingDeleteRequests.js
+│   ├── QueryShortCode.js
+│   ├── QueryAccountShortCode.js
+│   ├── AuditTrail.js
+│   └── TestShortCodeRequest.js
+│
+├── services
+│   ├── HttpService.js
+│   └── UserService.js
+│
+├── App.js
+└── index.js
+```
 
-### `yarn build`
+---
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+# Technology Stack
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+- React 17
+- React Router
+- TailwindCSS
+- Axios
+- Keycloak Authentication
+- Java Spring Boot Backend
+- PostgreSQL
+- RabbitMQ
+- Docker
+- Maven
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+---
 
-### `yarn eject`
+# Prerequisites
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+Before running this project ensure the following are installed.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+- Node.js 18+
+- npm
+- Java 11+
+- Maven
+- PostgreSQL
+- Docker Desktop (optional-I used it locally)
+- Git
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+---
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+# Clone the Repository
 
-## Learn More
+```bash
+git clone https://github.com/egarajere-png/shortcodes-ui.git
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+cd shortcodes-ui
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+---
 
-### Code Splitting
+# Install Dependencies
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+```bash
+npm install
+```
 
-### Analyzing the Bundle Size
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+# Backend Requirements
 
-### Making a Progressive Web App
+This frontend depends on the **Shortcodes Spring Boot Backend**.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+The backend **must be running** before using the UI.
 
-### Advanced Configuration
+Ensure the following backend services are available:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+- Spring Boot API
+- PostgreSQL Database
+- RabbitMQ
+- Keycloak Authentication Server
 
-### Deployment
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+# Running the Backend
 
-### `yarn build` fails to minify
+Navigate to the backend project.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Clean and build
+
+```bash
+./mvnw clean package
+```
+
+Run the application
+
+```bash
+./mvnw spring-boot:run
+```
+
+or
+
+```bash
+java -jar target/shortcode.jar
+```
+
+Verify that the backend starts successfully before launching the frontend.
+
+---
+
+# Running the Frontend
+
+Start the React application
+
+```bash
+npm start
+```
+
+The application will be available at
+
+```
+http://localhost:3000
+```
+
+---
+
+# Authentication
+
+Authentication is handled using **Keycloak**.
+
+After launching the application you will be redirected to the Keycloak login page.
+
+Depending on your assigned role you will have access to different features.
+
+### Maker
+
+- Request Shortcodes
+- Delete Shortcodes
+- Query Shortcodes
+- Query Accounts
+
+### Checker
+
+- Approve Requests
+- Approve Deletions
+- Audit Trail
+- Query Shortcodes
+- Query Accounts
+
+---
+
+# Backend Connectivity
+
+Ensure the frontend points to the correct backend URL.
+
+Update the API endpoint inside
+
+```
+src/services/HttpService.js
+```
+
+if necessary.
+
+Example
+
+```javascript
+const BASE_URL = "http://localhost:8080";
+```
+
+---
+
+# Application Workflow
+
+```
+Maker
+   │
+   ▼
+Request Shortcode
+   │
+   ▼
+Pending Approval
+   │
+   ▼
+Checker Approval
+   │
+   ▼
+Shortcode Created
+   │
+   ▼
+Customer Uses Shortcode
+```
+
+Deletion Workflow
+
+```
+Maker
+   │
+   ▼
+Request Deletion
+   │
+   ▼
+Pending Delete Approval
+   │
+   ▼
+Checker Approval
+   │
+   ▼
+Shortcode Deleted
+```
+
+---
+
+# Available Pages
+
+| Page | Description |
+|------|-------------|
+| Dashboard | Application overview |
+| Request Shortcode | Create new shortcode requests |
+| Delete Shortcode | Request shortcode deletion |
+| Pending Requests | Checker approval page |
+| Pending Deletions | Checker deletion approvals |
+| Query Shortcode | Search by shortcode |
+| Query Account | Search by customer account |
+| Audit Trail | View audit history |
+| Test Request | Testing page |
+| C2B Simulator | Simulate customer payments |
+| B2C Simulator | Simulate business payouts |
+
+---
+
+# Development
+
+Run the development server
+
+```bash
+npm start
+```
+
+Build production assets
+
+```bash
+npm run build
+```
+
+Run tests
+
+```bash
+npm test
+```
+
+---
+
+# Folder Overview
+
+```
+components/
+```
+
+Contains all application pages and reusable UI.
+
+```
+services/
+```
+
+Contains API communication and authentication services.
+
+```
+ui/
+```
+
+Reusable UI components.
+
+```
+mpesa/
+```
+
+Contains M-Pesa simulation pages.
+
+---
+
+# Troubleshooting
+
+### Backend not running
+
+Symptoms
+
+- Network Error
+- Failed to fetch
+- 404
+- Connection refused
+
+Solution
+
+Start the Spring Boot backend.
+
+---
+
+### Login fails
+
+Ensure
+
+- Keycloak is running
+- Realm is correctly configured
+- Client credentials are valid
+
+---
+
+### RabbitMQ Errors
+
+Ensure RabbitMQ is running before starting the backend.
+
+---
+
+### Database Errors
+
+Verify
+
+- PostgreSQL is running
+- Database credentials are correct
+- Database schema has been created
+
+---
+
+# Future Enhancements
+
+- Redis Caching
+- Email Notifications
+- Analytics Dashboard
+- Global Customer Search
+- User-selectable Shortcodes
+- Dashboard Metrics
+- Reporting
+- Notification Center
+
+---
+
+# Author
+
+**Suleiman Mashuhuli** & **Egara Bahati Jere**
+
+Software Engineer
+
+
+---
+
+# License
+
+This project is intended for internal demonstration purposes.
