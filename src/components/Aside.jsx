@@ -1,16 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import RenderOnRole from './access/RenderOnRole';
+import React, { useEffect } from 'react';
 import UserService from '../services/UserService';
 import { Link, useLocation } from 'react-router-dom';
 
+// ─── Navigation config ────────────────────────────────────────────────────────
 const NAV_SECTIONS = [
   {
     label: 'Overview',
     items: [
       {
-        to: '/dashboard',
-        label: 'Dashboard',
-        roles: null,
+        to: '/dashboard', label: 'Dashboard', roles: null,
         icon: (
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -25,9 +23,7 @@ const NAV_SECTIONS = [
     roles: ['maker'],
     items: [
       {
-        to: '/',
-        label: 'Request Shortcode',
-        roles: ['maker'],
+        to: '/', label: 'Request Shortcode', roles: ['maker'],
         icon: (
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -35,13 +31,21 @@ const NAV_SECTIONS = [
         ),
       },
       {
-        to: '/delete',
-        label: 'Delete Shortcode',
-        roles: ['maker'],
+        to: '/delete', label: 'Delete Shortcode', roles: ['maker'],
         icon: (
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
               d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          </svg>
+        ),
+      },
+      {
+        to: '/test-request', label: 'Test Request', roles: ['maker'],
+        badge: 'Dev',
+        icon: (
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+              d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
           </svg>
         ),
       },
@@ -52,9 +56,7 @@ const NAV_SECTIONS = [
     roles: ['checker'],
     items: [
       {
-        to: '/pending',
-        label: 'Pending Approvals',
-        roles: ['checker'],
+        to: '/pending', label: 'Pending Approvals', roles: ['checker'],
         icon: (
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -63,9 +65,7 @@ const NAV_SECTIONS = [
         ),
       },
       {
-        to: '/pending-delete',
-        label: 'Pending Deletions',
-        roles: ['checker'],
+        to: '/pending-delete', label: 'Pending Deletions', roles: ['checker'],
         icon: (
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -80,9 +80,7 @@ const NAV_SECTIONS = [
     roles: ['maker', 'checker'],
     items: [
       {
-        to: '/query',
-        label: 'Query Shortcode',
-        roles: ['maker', 'checker'],
+        to: '/query', label: 'Query Shortcode', roles: ['maker', 'checker'],
         icon: (
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -91,9 +89,7 @@ const NAV_SECTIONS = [
         ),
       },
       {
-        to: '/query/account',
-        label: 'Query by Account',
-        roles: ['maker', 'checker'],
+        to: '/query/account', label: 'Query by Account', roles: ['maker', 'checker'],
         icon: (
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -107,9 +103,7 @@ const NAV_SECTIONS = [
     label: 'M-Pesa',
     items: [
       {
-        to: '/c2b',
-        label: 'Simulate C2B',
-        roles: null,
+        to: '/c2b', label: 'Simulate C2B', roles: null,
         icon: (
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -118,9 +112,7 @@ const NAV_SECTIONS = [
         ),
       },
       {
-        to: '/b2c',
-        label: 'B2C Transfer',
-        roles: null,
+        to: '/b2c', label: 'B2C Transfer', roles: null,
         icon: (
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -132,83 +124,96 @@ const NAV_SECTIONS = [
   },
 ];
 
+// ─── Single nav item ──────────────────────────────────────────────────────────
 function NavItem({ item, isActive, onClick }) {
   return (
     <Link
       to={item.to}
       onClick={onClick}
-      className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all group
+      className={`
+        flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm
+        transition-all duration-150 group relative
         ${isActive
-          ? 'bg-blue-600 text-white font-medium shadow-sm'
-          : 'text-slate-300 hover:bg-slate-700 hover:text-white'
-        }`}
+          ? 'bg-[#0055A5] text-white font-semibold shadow-sm shadow-blue-900/30'
+          : 'text-slate-400 hover:bg-slate-800 hover:text-slate-100'}
+      `}
       aria-current={isActive ? 'page' : undefined}
     >
+      {/* Active left bar */}
+      {isActive && (
+        <span className="absolute left-0 top-1/2 -translate-y-1/2
+          w-0.5 h-5 bg-blue-300 rounded-r-full" />
+      )}
+
+      {/* Icon */}
       <span className={`flex-shrink-0 transition-colors
-        ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-white'}`}>
+        ${isActive ? 'text-white' : 'text-slate-500 group-hover:text-slate-300'}`}>
         {item.icon}
       </span>
-      <span className="truncate">{item.label}</span>
-      {isActive && (
-        <span className="ml-auto w-1.5 h-1.5 rounded-full bg-blue-300 flex-shrink-0" />
+
+      {/* Label */}
+      <span className="flex-1 truncate">{item.label}</span>
+
+      {/* Optional badge */}
+      {item.badge && (
+        <span className="text-[9px] font-bold uppercase tracking-wide
+          bg-purple-500/20 text-purple-300 border border-purple-500/30
+          px-1.5 py-0.5 rounded-full flex-shrink-0">
+          {item.badge}
+        </span>
       )}
     </Link>
   );
 }
 
+// ─── Sidebar content (shared between desktop & mobile drawer) ─────────────────
 function SidebarContent({ location, onNavClick }) {
-  const username = UserService.getUsername();
+  const username  = UserService.getUsername();
   const isChecker = UserService.hasRole(['checker']);
   const isMaker   = UserService.hasRole(['maker']);
   const roleLabel = isChecker ? 'Checker' : isMaker ? 'Maker' : 'Staff';
 
-  return (
-    <div className="flex flex-col h-full">
+  const roleColors = {
+    Checker: 'bg-green-500/20 text-green-300 border-green-500/30',
+    Maker:   'bg-blue-500/20  text-blue-300  border-blue-500/30',
+    Staff:   'bg-gray-500/20  text-gray-300  border-gray-500/30',
+  };
 
-      {/* ── Brand: ABC logo + portal name ─────────────────────────── */}
-      <div className="px-4 py-4 border-b border-slate-700">
-        <a
-          href="https://abcthebank.com"
-          target="_blank"
-          rel="noreferrer"
-          className="flex items-center gap-3 group"
-        >
-          <img
-            src="/abc-logo.png"
-            alt="ABC Bank"
-            className="h-9 w-auto flex-shrink-0"
-          />
+  return (
+    <div className="flex flex-col h-full overflow-hidden">
+
+      {/* ── Brand ──────────────────────────────────────────────────── */}
+      <div className="px-4 py-4 border-b border-slate-800 flex-shrink-0">
+        <a href="https://abcthebank.com" target="_blank" rel="noreferrer"
+          className="flex items-center gap-3 group">
+          <img src="/abc-logo.png" alt="ABC Bank" className="h-9 w-auto flex-shrink-0" />
           <div className="min-w-0">
-            <p className="text-sm font-bold text-white truncate leading-tight">
-              ABC Bank
-            </p>
-            <p className="text-xs text-slate-400 truncate">
-              Shortcodes Portal
-            </p>
+            <p className="text-sm font-bold text-white truncate leading-tight">ABC Bank</p>
+            <p className="text-[11px] text-slate-500 truncate">Shortcodes Portal</p>
           </div>
         </a>
       </div>
 
-      {/* ── Navigation ────────────────────────────────────────────── */}
-      <nav
-        className="flex-1 overflow-y-auto px-3 py-4 space-y-5"
-        aria-label="Main navigation"
-      >
+      {/* ── Navigation ─────────────────────────────────────────────── */}
+      <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-6
+        scrollbar-thin scrollbar-track-transparent scrollbar-thumb-slate-700"
+        aria-label="Main navigation">
         {NAV_SECTIONS.map((section) => {
           if (section.roles && !UserService.hasRole(section.roles)) return null;
 
-          const visibleItems = section.items.filter(
+          const visible = section.items.filter(
             (item) => !item.roles || UserService.hasRole(item.roles)
           );
-          if (visibleItems.length === 0) return null;
+          if (visible.length === 0) return null;
 
           return (
             <div key={section.label}>
-              <p className="px-3 mb-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-500">
+              <p className="px-3 mb-2 text-[10px] font-bold uppercase
+                tracking-widest text-slate-600">
                 {section.label}
               </p>
               <div className="space-y-0.5">
-                {visibleItems.map((item) => (
+                {visible.map((item) => (
                   <NavItem
                     key={item.to}
                     item={item}
@@ -222,19 +227,24 @@ function SidebarContent({ location, onNavClick }) {
         })}
       </nav>
 
-      {/* ── Footer: user info + logout ────────────────────────────── */}
-      <div className="border-t border-slate-700 px-3 py-4 space-y-1">
-        {/* User row */}
-        <div className="flex items-center gap-3 px-3 py-2 mb-2">
-          <div className="w-8 h-8 rounded-full bg-blue-700 flex items-center justify-center flex-shrink-0">
-            <span className="text-xs font-bold text-white uppercase">
+      {/* ── User profile + actions ──────────────────────────────────── */}
+      <div className="border-t border-slate-800 px-3 py-4 flex-shrink-0 space-y-1">
+        {/* User info block */}
+        <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg
+          bg-slate-800/50 border border-slate-700/50 mb-3">
+          {/* Avatar */}
+          <div className="w-9 h-9 rounded-lg bg-[#0055A5] flex items-center
+            justify-center flex-shrink-0 shadow-sm">
+            <span className="text-sm font-bold text-white uppercase">
               {username ? username.charAt(0) : 'U'}
             </span>
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-xs font-medium text-white truncate">{username}</p>
-            <span className="inline-flex items-center gap-1 text-[10px] text-blue-300 font-medium">
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-400 flex-shrink-0" />
+            <p className="text-xs font-semibold text-slate-200 truncate">{username}</p>
+            <span className={`inline-flex items-center gap-1 text-[10px] font-semibold
+              px-1.5 py-0.5 rounded border mt-0.5
+              ${roleColors[roleLabel] || roleColors.Staff}`}>
+              <span className="w-1.5 h-1.5 rounded-full bg-current flex-shrink-0" />
               {roleLabel}
             </span>
           </div>
@@ -242,41 +252,46 @@ function SidebarContent({ location, onNavClick }) {
 
         {/* Help */}
         <button
-          onClick={() =>
-            window.open(
-              'http://172.16.2.175/otrs/index.pl?Action=AgentFAQZoom;ItemID=10',
-              '_blank',
-              'noopener,noreferrer'
-            )
-          }
-          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-300 hover:bg-slate-700 hover:text-white transition-all"
+          onClick={() => window.open(
+            'http://172.16.2.175/otrs/index.pl?Action=AgentFAQZoom;ItemID=10',
+            '_blank', 'noopener,noreferrer'
+          )}
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg
+            text-sm text-slate-400 hover:bg-slate-800 hover:text-slate-200
+            transition-all duration-150"
         >
-          <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-              d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278
+              2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          Help & Support
+          <span>Help & Support</span>
         </button>
 
         {/* Logout */}
         <button
           onClick={() => UserService.doLogout()}
-          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-300 hover:bg-red-900/40 hover:text-red-300 transition-all"
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg
+            text-sm text-slate-400 hover:bg-red-950/60 hover:text-red-400
+            transition-all duration-150 group"
         >
-          <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 flex-shrink-0 group-hover:translate-x-0.5
+            transition-transform duration-150" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
               d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
           </svg>
-          Sign Out
+          <span>Sign Out</span>
         </button>
       </div>
     </div>
   );
 }
 
+// ─── Aside root ───────────────────────────────────────────────────────────────
 function Aside({ mobileOpen, onMobileClose }) {
   const location = useLocation();
 
+  // Close drawer on navigation
   useEffect(() => {
     if (mobileOpen) onMobileClose?.();
   }, [location.pathname]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -285,29 +300,36 @@ function Aside({ mobileOpen, onMobileClose }) {
     <>
       {/* Desktop permanent sidebar */}
       <aside
-        className="hidden lg:flex flex-col w-60 flex-shrink-0 bg-slate-900 h-screen sticky top-0 overflow-hidden"
-        aria-label="Sidebar"
+        className="hidden lg:flex flex-col w-60 flex-shrink-0
+          bg-slate-900 h-screen sticky top-0"
+        aria-label="Sidebar navigation"
       >
         <SidebarContent location={location} />
       </aside>
 
       {/* Mobile slide-in drawer */}
       {mobileOpen && (
-        <div className="fixed inset-0 z-40 lg:hidden" role="dialog" aria-modal="true">
+        <div className="fixed inset-0 z-40 lg:hidden" role="dialog" aria-modal="true"
+          aria-label="Navigation drawer">
+          {/* Backdrop */}
           <div
-            className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-slate-950/70 backdrop-blur-sm"
             onClick={onMobileClose}
             aria-hidden="true"
           />
-          <aside className="relative flex flex-col w-72 h-full bg-slate-900 shadow-xl overflow-hidden">
+          {/* Drawer panel */}
+          <aside className="relative flex flex-col w-72 h-full bg-slate-900 shadow-2xl">
+            {/* Close button */}
             <div className="absolute top-3 right-3 z-10">
               <button
                 onClick={onMobileClose}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700"
+                className="p-1.5 rounded-lg text-slate-500 hover:text-white
+                  hover:bg-slate-700 transition-colors"
                 aria-label="Close navigation"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
