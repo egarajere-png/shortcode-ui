@@ -1,18 +1,19 @@
-import React from 'react'
+import React from 'react';
 
 function Footer() {
-    const [date,setDate] = React.useState();
-    React.useEffect(()=>{
-        setDate(new Date().getFullYear());
-    },[])
-    return (
-        <footer className="p-8 bg-white rounded-lg shadow md:px-6 md:py-8 dark:bg-gray-900">
-            <span className="block text-sm text-gray-500 sm:text-center dark:text-gray-400">©
-             {date} <a href="https://abcthebank.com/" className="hover:underline">ABC Bank</a>
-            </span>
-        </footer>
-
-    )
+  const year = new Date().getFullYear();
+  return (
+    <footer className="border-t border-gray-200 bg-white px-6 py-3">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
+        <p className="text-xs text-gray-400">
+          © {year} ABC Bank. Shortcodes Management Portal. All rights reserved.
+        </p>
+        <p className="text-xs text-gray-400">
+          Internal use only — Authorised personnel only
+        </p>
+      </div>
+    </footer>
+  );
 }
 
-export default Footer
+export default Footer;
