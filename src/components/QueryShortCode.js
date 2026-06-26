@@ -1,161 +1,149 @@
-import React, { useState } from 'react'
+import React, { useState } from 'react';
 import Loading from './loading/Loading';
 import HttpService from '../services/HttpService';
-import { useNavigate } from "react-router-dom";
-
+import { useNavigate } from 'react-router-dom';
 import URLConstants from '../urlsConfig';
+import { PageHeader } from './ui/PageHeader';
+import { InputField } from './ui/InputField';
+import { Button } from './ui/Button';
+import { StatusBadge } from './ui/StatusBadge';
+import { useToast, Toast } from './ui/Toast';
 
 function QueryShortCode() {
   const authedAxios = HttpService.getAxiosClient();
-
+  const { toasts, removeToast, toast } = useToast();
 
   const [loading, setLoading] = useState(false);
-  const [loadingMessage,] = useState("Submiting request")
-  const [accountLookupResponse, setAccountLookupResponse] = useState({
-    "accountNumber": "",
-    "accountName": "",
-    "custId": "",
-    "idNumber": "",
-    "phoneNumber": "",
-    "emailAddress": "",
-    "accountStatus": ""
-  })
+  const [result, setResult] = useState(null);
 
-  //handle account look up
-  const handleShortCodeLookUp = (e) => {
+  const handleLookup = (e) => {
     e.preventDefault();
-    setLoading(true)
-    authedAxios.get(`${URLConstants.baseAPIURL}/${URLConstants.getShortCodeAccountDetailsURL(e.target.account.value)}`, { timeout: 10000 })
-      .then(function (response) {
-        console.log(response.data)
+    setLoading(true);
+    setResult(null);
+
+    authedAxios
+      .get(`${URLConstants.baseAPIURL}/${URLConstants.getShortCodeAccountDetailsURL(e.target.account.value)}`, { timeout: 10000 })
+      .then((response) => {
         setLoading(false);
         const data = response.data;
         if (data?.id) {
-          setAccountLookupResponse(data);
+          setResult(data);
         } else {
-          alert("Could not get short code details")
-          setAccountLookupResponse({});
+          toast.warning('No shortcode found for that number.', 'Not Found');
         }
       })
-      .catch(function (error) {
-        console.log(error)
-        setLoading(false)
-        setAccountLookupResponse({})
+      .catch((error) => {
+        setLoading(false);
+        setResult(null);
         if (error.code === 'ECONNABORTED') {
-          alert("Query took longer than expected. Try again");
-          return
+          toast.warning('The request timed out. Please try again.', 'Timeout');
+        } else {
+          toast.error('Could not retrieve shortcode details.', 'Error');
         }
-        alert("Could not get short code details")
       });
-  }
-
-  return (
-    <React.Fragment>
-      <div className='mb-6'>
-        <form className='w-96' onSubmit={handleShortCodeLookUp}>
-          <div className="my-2">
-            <label for="account" className="block mb-2 text-sm font-medium text-gray-900">Enter Short Code</label>
-            <input type="text" id="account" name='account' className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required />
-          </div>
-          
-          <button type="submit" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center">Query Short Code</button>
-        </form>
-      </div>
-      {loading && <Loading message={loadingMessage} />}
-      {accountLookupResponse?.shortCode && <LookupComponent account={accountLookupResponse} />}
-    </React.Fragment>
-  )
-}
-
-
-export default QueryShortCode
-
-
-const LookupComponent = ({ account }) => {
-  const navigate = useNavigate();
-  const viewAuditTrail = () => {
-    navigate(`/audit/${account.shortCode}`);
   };
-  const downloadShortCode = () => {
-    window.open(`${URLConstants.baseURL}/${URLConstants.getReceiptURL(account?.shortCode)}`, '_blank', "height=570,width=520");
-  }
 
   return (
-    <div className="shadow-md sm:rounded-lg w-1/2">
-      <table className="text-sm text-left text-gray-500 dark:text-gray-400 w-full">
-        <caption className="p-5 text-lg font-semibold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-800">
-          Short Code Details
-        </caption>
-        <tbody>
-          <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-            <th scope="row" className="py-4 px-6 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-              Short Code:
-            </th>
-            <td className="py-4 px-6">
-              {account?.shortCode}
-            </td>
-          </tr>
-          <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-            <th scope="row" className="py-4 px-6 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-              Sequence Number:
-            </th>
-            <td className="py-4 px-6">
-              {account?.sequenceNumber}
-            </td>
-          </tr>
-          <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-            <th scope="row" className="py-4 px-6 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-              Account Name:
-            </th>
-            <td className="py-4 px-6">
-              {account?.accountName}
-            </td>
-          </tr>
-          <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-            <th scope="row" className="py-4 px-6 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-              Account Number:
-            </th>
-            <td className="py-4 px-6">
-              {account?.accountNumber}
-            </td>
-          </tr>
-          <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-            <th scope="row" className="py-4 px-6 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-              Approved By
-            </th>
-            <td className="py-4 px-6">
-              {account?.approver}
-            </td>
-          </tr>
-          <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-            <th scope="row" className="py-4 px-6 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-              Approved On
-            </th>
-            <td className="py-4 px-6">
-              {account?.dateApproved}
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <div className="bg-gray-200 px-4 py-3 text-right">
+    <div>
+      <Toast toasts={toasts} removeToast={removeToast} />
+      <PageHeader
+        title="Query Shortcode"
+        subtitle="Look up shortcode details by shortcode number"
+      />
 
-  <button
-    onClick={viewAuditTrail}
-    type="button"
-    className="py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-700 mr-2"
-  >
-    View Audit Trail
-  </button>
+      <div className="max-w-xl mb-6">
+        <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <form onSubmit={handleLookup} className="flex flex-col sm:flex-row gap-3">
+            <div className="flex-1">
+              <InputField
+                id="account"
+                name="account"
+                placeholder="Enter shortcode number"
+                required
+              />
+            </div>
+            <Button type="submit" loading={loading} loadingText="Searching..." size="md" className="flex-shrink-0">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              Search
+            </Button>
+          </form>
+        </div>
+      </div>
 
-  <button
-    onClick={downloadShortCode}
-    type="button"
-    className="py-2 px-4 bg-gray-500 text-white rounded hover:bg-gray-700 mr-2"
-  >
-    Download ShortCode Details
-  </button>
+      {loading && <Loading message="Searching shortcode..." />}
 
-</div>
+      {result && <ShortCodeResultCard account={result} />}
     </div>
-  )
+  );
 }
+
+function ShortCodeResultCard({ account }) {
+  const navigate = useNavigate();
+
+  const fields = [
+    { label: 'Short Code', value: account?.shortCode, mono: true, highlight: true },
+    { label: 'Sequence Number', value: account?.sequenceNumber, mono: true },
+    { label: 'Account Name', value: account?.accountName },
+    { label: 'Account Number', value: account?.accountNumber, mono: true },
+    { label: 'Approved By', value: account?.approver },
+    { label: 'Approved On', value: account?.dateApproved },
+  ];
+
+  return (
+    <div className="max-w-xl">
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        {/* Card header */}
+        <div className="px-6 py-4 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
+          <div>
+            <h3 className="text-sm font-semibold text-gray-900">Shortcode Details</h3>
+            <p className="text-xs text-gray-400 mt-0.5">Retrieved from core banking system</p>
+          </div>
+          <StatusBadge status="active" label="Active" />
+        </div>
+
+        {/* Highlight: shortcode number */}
+        <div className="px-6 py-5 border-b border-gray-100 bg-blue-50">
+          <p className="text-xs font-bold uppercase tracking-widest text-blue-500 mb-1">Shortcode</p>
+          <p className="text-3xl font-bold text-blue-900 font-mono">{account?.shortCode}</p>
+        </div>
+
+        {/* Fields */}
+        <dl className="divide-y divide-gray-100">
+          {fields.slice(1).map(({ label, value, mono }) => (
+            <div key={label} className="flex flex-col sm:flex-row sm:items-center px-6 py-3 gap-1">
+              <dt className="text-xs font-semibold uppercase tracking-wider text-gray-400 sm:w-40 flex-shrink-0">{label}</dt>
+              <dd className={`text-sm font-medium text-gray-900 ${mono ? 'font-mono' : ''}`}>{value || '—'}</dd>
+            </div>
+          ))}
+        </dl>
+
+        {/* Actions */}
+        <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex flex-col sm:flex-row gap-3">
+          <Button
+            variant="secondary"
+            onClick={() => navigate(`/audit/${account.shortCode}`)}
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+            View Audit Trail
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={() => window.open(`${URLConstants.baseURL}/${URLConstants.getReceiptURL(account?.shortCode)}`, '_blank', 'height=570,width=520')}
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            Download Details
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default QueryShortCode;

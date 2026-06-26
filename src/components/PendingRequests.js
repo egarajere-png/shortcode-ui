@@ -4,273 +4,234 @@ import Loading from './loading/Loading';
 import HttpService from '../services/HttpService';
 import UserService from '../services/UserService';
 import { useNavigate } from 'react-router-dom';
-
+import { PageHeader } from './ui/PageHeader';
+import { EmptyState } from './ui/EmptyState';
+import { ConfirmationModal } from './ui/ConfirmationModal';
+import { useToast, Toast } from './ui/Toast';
 
 function PendingRequests() {
+  const [pending, setPending] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const { toasts, removeToast, toast } = useToast();
+  const authedAxios = HttpService.getAxiosClient();
 
-    const [pending, setPending] = useState();
-    const [loading, setLoading] = useState(false);
-    //const [loadingMessage,] = useState("Loading Pending Requests");
-    const [viewItem, setViewItem] = React.useState([])
+  const getPending = () => {
+    setLoading(true);
+    authedAxios
+      .get(`${URLConstants.baseAPIURL}/${URLConstants.pendingRequestURL}`, { timeout: 5000 })
+      .then((response) => {
+        setLoading(false);
+        setPending(response.data || []);
+      })
+      .catch((error) => {
+        setLoading(false);
+        if (error.code === 'ECONNABORTED') {
+          toast.warning('Request timed out. Please try again.', 'Timeout');
+        } else {
+          toast.error('Failed to load pending approvals.', 'Error');
+        }
+      });
+  };
 
-    const authedAxios = HttpService.getAxiosClient();
+  useEffect(() => { getPending(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  return (
+    <div>
+      <Toast toasts={toasts} removeToast={removeToast} />
+      <PageHeader
+        title="Pending Approvals"
+        subtitle="Review and approve shortcode requests submitted by makers"
+        action={
+          <button
+            onClick={getPending}
+            className="inline-flex items-center gap-2 px-3 py-2 text-sm text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            Refresh
+          </button>
+        }
+      />
 
-    const showModal = (item) => {
-        document.getElementById('modal').classList.toggle('hidden')
-        setViewItem(item)
-    }
+      {loading && <Loading message="Loading pending approvals..." />}
 
-    const getPending = () => {
-        authedAxios.get(`${URLConstants.baseAPIURL}/${URLConstants.pendingRequestURL}`, { timeout: 5000 })
-            .then(function (response) {
-                console.log(response.data)
-                setLoading(false);
-                const data = response.data;
-                setPending(data)
-            })
-            .catch(function (error) {
-                console.log(error)
-                setLoading(false)
-                if (error.code === 'ECONNABORTED') {
-                    alert("Query took longer than expected. Try again");
-                    return
-                }
-                alert("Could not get that account number")
-            });
-    }
-
-
-    const getPendingv2 = () => {
-        authedAxios.get(`${URLConstants.baseAPIURL}/${URLConstants.pendingRequestURL}`, { timeout: 5000 })
-            .then(function (response) {
-                const data = response.data;
-                setPending(data)
-            })
-            .catch(function (error) {
-                if (error.code === 'ECONNABORTED') {
-                    return
-                }
-            });
-    }
-
-    useEffect(() => {
-        getPending()
-    }, [])
-
-    return (
-        <div>
-            <div class="overflow-x-auto relative">
-                <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                    <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                        <tr>
-                            <th scope="col" class="py-3 px-6">
-                                Account Name
-                            </th>
-                            <th scope="col" class="py-3 px-6">
-                                Account No.
-                            </th>
-                            <th scope="col" class="py-3 px-6">
-                                Request By
-                            </th>
-                            <th scope="col" class="py-3 px-6">
-                                Approve
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {
-                            pending?.map(item => (
-                                <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                                    <th scope="row" class="py-4 px-6 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                        {item.accountName}
-                                    </th>
-                                    <td class="py-4 px-6">
-                                        {item.accountNumber}
-                                    </td>
-                                    <td class="py-4 px-6">
-                                        {item.initiator}
-                                    </td>
-                                    <td class="py-4 px-6">
-                                        <button type="button" onClick={() => showModal(item)}
-                                            class="py-2.5 px-5 mr-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none
-                  bg-white rounded-lg border border-gray-200 hover:bg-gray-100
-                   hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200">
-                                            Approve
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))
-                        }
-                    </tbody>
-                </table>
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        {pending.length === 0 && !loading ? (
+          <EmptyState
+            title="No pending approvals"
+            description="All shortcode requests have been processed. Check back later."
+          />
+        ) : (
+          <>
+            {/* Desktop table */}
+            <div className="hidden sm:block overflow-x-auto">
+              <table className="w-full text-sm text-left">
+                <thead>
+                  <tr className="border-b border-gray-100 bg-gray-50">
+                    <th className="px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-500">Account Name</th>
+                    <th className="px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-500">Account No.</th>
+                    <th className="px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-500">Requested By</th>
+                    <th className="px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-500">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {pending.map((item, i) => (
+                    <tr key={i} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-5 py-4 font-medium text-gray-900">{item.accountName}</td>
+                      <td className="px-5 py-4 text-gray-600 font-mono text-xs">{item.accountNumber}</td>
+                      <td className="px-5 py-4 text-gray-600">{item.initiator}</td>
+                      <td className="px-5 py-4">
+                        <button
+                          onClick={() => setSelectedItem(item)}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                          Review & Approve
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-            <EslipModal payload={viewItem} getPending={getPendingv2} />
-            {/* <Loading message={loadingMessage} /> */}
-        </div>
-    )
+
+            {/* Mobile card list */}
+            <div className="sm:hidden divide-y divide-gray-100">
+              {pending.map((item, i) => (
+                <div key={i} className="px-4 py-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="font-semibold text-gray-900 text-sm">{item.accountName}</p>
+                      <p className="text-xs font-mono text-gray-500 mt-0.5">{item.accountNumber}</p>
+                      <p className="text-xs text-gray-400 mt-1">By: {item.initiator}</p>
+                    </div>
+                    <button
+                      onClick={() => setSelectedItem(item)}
+                      className="flex-shrink-0 px-3 py-1.5 text-xs font-semibold bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors"
+                    >
+                      Review
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* Approval modal */}
+      {selectedItem && (
+        <ApprovalModal
+          item={selectedItem}
+          onClose={() => setSelectedItem(null)}
+          onSuccess={() => {
+            setSelectedItem(null);
+            getPending();
+            toast.success('Shortcode approved successfully.', 'Approved');
+          }}
+          onError={(msg) => toast.error(msg, 'Approval Failed')}
+        />
+      )}
+    </div>
+  );
 }
 
+function ApprovalModal({ item, onClose, onSuccess, onError }) {
+  const [loading, setLoading] = useState(false);
+  const [downloadReady, setDownloadReady] = useState(false);
+  const [shortCodeResponse, setShortCodeResponse] = useState(null);
+  const authedAxios = HttpService.getAxiosClient();
+  const navigate = useNavigate();
 
-const EslipModal = ({ payload, getPending }) => {
-    const [loading, setLoading] = React.useState(false)
-    const [message, setMessage] = React.useState("")
-    const [downloadView, showDownloadView] = React.useState(false);
-    const [shortCodeResponse, setShortCodeResponse] = useState({})
-
-    const authedAxios = HttpService.getAxiosClient();
-    const navigate = useNavigate();
-
-    const toggleModal = () => {
-        document.getElementById('modal').classList.toggle('hidden')
-    }
-
-    const downloadReceipt = () => {
-        document.getElementById('modal').classList.toggle('hidden')
-        window.open(`${URLConstants.baseURL}/${URLConstants.getReceiptURL(shortCodeResponse?.shortCode)}`, '_blank', "height=570,width=520");
-        showDownloadView(false)
-    }
-
-    const approveShortCodeRequest = () => {
-
+  const approve = () => {
     if (loading) return;
-
     setLoading(true);
-    setMessage("Approving shortcode Request");
 
-    const requestPayload = {
-        accountNumber: payload?.accountNumber,
-        approver: UserService.getUsername()
+    const payload = {
+      accountNumber: item.accountNumber,
+      approver: UserService.getUsername(),
     };
 
-    authedAxios.post(
-        `${URLConstants.baseAPIURL}/${URLConstants.approveURL}`,
-        requestPayload
-    )
-    .then(function (response) {
-
+    authedAxios
+      .post(`${URLConstants.baseAPIURL}/${URLConstants.approveURL}`, payload)
+      .then((response) => {
         const data = response.data;
-
+        setLoading(false);
         if (data.approved) {
-
-            setShortCodeResponse(data);
-            showDownloadView(true);
-
-            alert("Short code generated successfully. Click okay to download");
-
-            navigate("/pending");
-
-            getPending();
-
+          setShortCodeResponse(data);
+          setDownloadReady(true);
+          onSuccess();
+          navigate('/pending');
         } else {
-
-            alert("Failed to approve shortcode");
-
+          onError('The approval could not be processed. Please try again.');
         }
-
+      })
+      .catch((error) => {
         setLoading(false);
-
-    })
-    .catch(function (error) {
-
-        setLoading(false);
-        setShortCodeResponse({});
-
-        if (error.code === "ECONNABORTED") {
-
-            alert("Query took longer than expected. Try again");
-            return;
-
+        if (error.code === 'ECONNABORTED') {
+          onError('The request timed out. Please try again.');
+        } else {
+          onError('Failed to approve this request.');
         }
+        onClose();
+      });
+  };
 
-        alert("Failed to submit request");
+  const downloadReceipt = () => {
+    window.open(
+      `${URLConstants.baseURL}/${URLConstants.getReceiptURL(shortCodeResponse?.shortCode)}`,
+      '_blank',
+      'height=570,width=520'
+    );
+  };
 
-    });
-
-};
-
-    return (
-        <React.Fragment>
-            <div className="fixed z-10 overflow-y-auto top-0 w-full left-0 hidden" id="modal">
-                <div className="flex items-center justify-center min-height-100vh pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-                    <div className="fixed inset-0 transition-opacity">
-                        <div className="absolute inset-0 bg-gray-900 opacity-75" />
-                    </div>
-                    <span className="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
-                    <div className="inline-block align-center bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
-                        role="dialog" aria-modal="true" aria-labelledby="modal-headline">
-                        <h4 class="font-medium leading-tight text-2xl py-4 px-4 mx-auto w-full">Approve Shortcode Request</h4>
-                        <div className="bg-white px-4 pt-1 pb-4 sm:p-6 sm:pb-4">
-                            <table className="w-98 text-sm text-left text-gray-500 dark:text-gray-400">
-                                <thead className="text-xs text-gray-700 uppercase dark:text-gray-400">
-                                    <tr>
-                                        <th scope="col" className="py-3 px-6 bg-gray-50 dark:bg-gray-800">
-                                            Account Name
-                                        </th>
-                                        <td className="py-3 px-6">
-                                            {payload?.accountName}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="col" className="py-3 px-6 bg-gray-50 dark:bg-gray-800">
-                                            Account Number                                        </th>
-                                        <td className="py-3 px-6">
-                                            {payload?.accountNumber}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="col" className="py-3 px-6 bg-gray-50 dark:bg-gray-800">
-                                            Initiated By
-                                        </th>
-                                        <td className="py-3 px-6">
-                                            {payload?.initiator}
-                                        </td>
-                                    </tr>
-                                </thead>
-                            </table>
-                        </div>
-                     <div className="bg-gray-200 px-4 py-3 text-right">
-
-    <button
-        type="button"
-        className="py-2 px-4 bg-gray-500 text-white rounded hover:bg-gray-700 mr-2"
-        onClick={toggleModal}
+  return (
+    <ConfirmationModal
+      isOpen
+      onClose={onClose}
+      onConfirm={approve}
+      title="Approve Shortcode Request"
+      confirmLabel="Approve Request"
+      confirmVariant="primary"
+      loading={loading}
+      loadingLabel="Approving..."
     >
-        Cancel
-    </button>
-
-    {downloadView &&
-        <button
-            onClick={downloadReceipt}
-            type="button"
-            className="py-2 px-4 bg-gray-500 text-white rounded hover:bg-gray-700 mr-2"
-        >
-            Download Details
-        </button>
-    }
-
-    <button
-        type="button"
-        disabled={loading}
-        className={`py-2 px-4 text-white rounded mr-2 ${
-            loading
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-blue-500 hover:bg-blue-700"
-        }`}
-        onClick={approveShortCodeRequest}
-    >
-        {loading ? "Approving..." : "Approve Request"}
-    </button>
-
-</div>
-                    </div>
-                </div>
+      <div className="space-y-3">
+        <p className="text-sm text-gray-500 mb-4">
+          Please review the details below before approving this shortcode request.
+        </p>
+        <dl className="divide-y divide-gray-100 border border-gray-100 rounded-lg overflow-hidden">
+          {[
+            { label: 'Account Name', value: item.accountName },
+            { label: 'Account Number', value: item.accountNumber },
+            { label: 'Initiated By', value: item.initiator },
+          ].map(({ label, value }) => (
+            <div key={label} className="flex items-center px-4 py-3 bg-white even:bg-gray-50">
+              <dt className="text-xs font-semibold text-gray-400 uppercase tracking-wider w-36 flex-shrink-0">{label}</dt>
+              <dd className="text-sm font-medium text-gray-900 font-mono">{value}</dd>
             </div>
-            {loading && <Loading message={message} />}
-        </React.Fragment>
-    )
+          ))}
+        </dl>
+        {downloadReady && (
+          <button
+            onClick={downloadReceipt}
+            className="w-full mt-3 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-green-700 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            Download Shortcode Details
+          </button>
+        )}
+      </div>
+    </ConfirmationModal>
+  );
 }
 
-export default PendingRequests
-
-
+export default PendingRequests;
