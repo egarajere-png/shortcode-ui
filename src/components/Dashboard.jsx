@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+// import { Route, Routes, Navigate } from 'react-router-dom';
+// import { Link } from 'react-router-dom';
 import UserService from '../services/UserService';
 import RenderOnRole from './access/RenderOnRole';
 
@@ -11,6 +12,7 @@ import ActivityTimeline  from './ui/ActivityTimeline';
 import NotificationBell  from './ui/NotificationBell';
 import MiniBarChart      from './ui/MiniBarChart';
 import SystemHealthCard  from './ui/SystemHealthCard';
+import DashboardService from "../services/DashboardService";
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
 
@@ -40,14 +42,6 @@ function useClock() {
   }, []);
   return now;
 }
-
-// ─── Mocked KPI data (replace values with API calls when ready) ───────────────
-const KPI = {
-  approvedShortcodes: { value: 742,  trend: '+18 this week',  trendDirection: 'up'      },
-  pendingRequests:    { value: 15,   trend: '+3 today',       trendDirection: 'up'      },
-  pendingDeletions:   { value: 5,    trend: 'No change',      trendDirection: 'neutral' },
-  todayRequests:      { value: 31,   trend: '+8 vs yesterday', trendDirection: 'up'     },
-};
 
 // ─── Icon helpers (kept inline to avoid extra files) ─────────────────────────
 const Icon = {
@@ -211,6 +205,26 @@ function Dashboard() {
   const isChecker = UserService.hasRole(['checker']);
   const isMaker   = UserService.hasRole(['maker']);
   const roleLabel = isChecker ? 'Checker' : isMaker ? 'Maker' : 'Staff';
+  const [analytics, setAnalytics] = useState(null);
+  const [loadingAnalytics, setLoadingAnalytics] = useState(true);
+
+  
+
+  useEffect(() => {
+
+    DashboardService.getAnalytics()
+        .then((response) => {
+           console.log("Dashboard Analytics:", response.data);
+           setAnalytics(response.data);
+        })
+        .catch((error) => {
+            console.error("Failed to load dashboard analytics", error);
+        })
+        .finally(() => {
+            setLoadingAnalytics(false);
+        });
+
+}, []);
 
   return (
     <div>
@@ -222,43 +236,47 @@ function Dashboard() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <AnalyticsCard
             title="Approved Shortcodes"
-            value={KPI.approvedShortcodes.value}
+            value={analytics?.activeShortcodes ?? 0}
             subtitle="Total active shortcodes"
-            trend={KPI.approvedShortcodes.trend}
-            trendDirection={KPI.approvedShortcodes.trendDirection}
+            trend={`${analytics?.approvalRate ?? 0}% approval`}
+            trendDirection="up"
             iconBg="bg-blue-50"
             iconColor="text-[#003A70]"
             icon={Icon.shortcode}
+            loading={loadingAnalytics}
           />
           <AnalyticsCard
             title="Pending Requests"
-            value={KPI.pendingRequests.value}
+            value={analytics?.pendingApprovals ?? 0}
             subtitle="Awaiting checker approval"
-            trend={KPI.pendingRequests.trend}
-            trendDirection={KPI.pendingRequests.trendDirection}
+            trend="Awaiting approval"
+            trendDirection="neutral"
             iconBg="bg-amber-50"
             iconColor="text-amber-700"
             icon={Icon.pending}
+            loading={loadingAnalytics}
           />
           <AnalyticsCard
             title="Pending Deletions"
-            value={KPI.pendingDeletions.value}
+            value={analytics?.pendingDeletions ?? 0}
             subtitle="Awaiting deletion approval"
-            trend={KPI.pendingDeletions.trend}
-            trendDirection={KPI.pendingDeletions.trendDirection}
+            trend="Awaiting deletion"
+            trendDirection="neutral"
             iconBg="bg-red-50"
             iconColor="text-red-700"
             icon={Icon.trash}
+            loading={loadingAnalytics}
           />
           <AnalyticsCard
             title="Today's Requests"
-            value={KPI.todayRequests.value}
+            value={analytics?.todayRequests ?? 0}
             subtitle="Shortcode requests today"
-            trend={KPI.todayRequests.trend}
-            trendDirection={KPI.todayRequests.trendDirection}
+            trend="Total Requests"
+            trendDirection="up"
             iconBg="bg-indigo-50"
             iconColor="text-indigo-700"
             icon={Icon.today}
+            loading={loadingAnalytics}
           />
         </div>
       </DashboardSection>
@@ -282,7 +300,7 @@ function Dashboard() {
             <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3">
               <QuickActionCard
                 label="Request Shortcode"
-                to="/"
+                to="/request"
                 icon={Icon.plus}
                 iconBg="bg-blue-50"
                 iconColor="text-[#003A70]"
@@ -321,7 +339,7 @@ function Dashboard() {
                 icon={Icon.check}
                 iconBg="bg-amber-50"
                 iconColor="text-amber-600"
-                badge={KPI.pendingRequests.value}
+                badge={analytics?.pendingApprovals ?? 0}
                 badgeColor="bg-amber-100 text-amber-800"
               />
               <QuickActionCard
@@ -330,7 +348,7 @@ function Dashboard() {
                 icon={Icon.warning}
                 iconBg="bg-orange-50"
                 iconColor="text-orange-600"
-                badge={KPI.pendingDeletions.value}
+                badge={analytics?.pendingDeletions ?? 0}
                 badgeColor="bg-orange-100 text-orange-800"
               />
             </div>
@@ -394,7 +412,7 @@ function Dashboard() {
         <MiniBarChart />
         <SystemHealthCard />
       </div>
-    </div>
+    </div>    
   );
 }
 
