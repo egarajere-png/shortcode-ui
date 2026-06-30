@@ -244,6 +244,7 @@ function Dashboard() {
             iconColor="text-[#003A70]"
             icon={Icon.shortcode}
             loading={loadingAnalytics}
+            to="/registry/active"
           />
           <AnalyticsCard
             title="Pending Requests"

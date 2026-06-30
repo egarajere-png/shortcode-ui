@@ -16,6 +16,9 @@ import TestShortCodeRequest from "./TestShortCodeRequest";
 import B2C from "./mpesa/B2C";
 import C2B from "./mpesa/C2B";
 import RenderOnRole from "./access/RenderOnRole";
+import Registry from "./Registry";
+
+
 
 function ComponetsContainer() {
   return (
@@ -38,6 +41,24 @@ function ComponetsContainer() {
             <RenderOnRole roles={["apicaller"]}>
                 <Dashboard />
             </RenderOnRole>
+        </ComponentWithAsideBar>
+    }
+/>
+
+<Route
+    path="/registry"
+    element={
+        <ComponentWithAsideBar>
+            <Registry />
+        </ComponentWithAsideBar>
+    }
+/>
+
+      <Route
+    path="/registry/:status"
+    element={
+        <ComponentWithAsideBar>
+            <Registry />
         </ComponentWithAsideBar>
     }
 />
