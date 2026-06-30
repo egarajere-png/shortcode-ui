@@ -1,25 +1,68 @@
-import React from 'react'
-import { Route, Routes } from 'react-router-dom'
-import ComponentWithAsideBar from './ComponentWithAsideBar'
-import PendingRequests from './PendingRequests'
-import QueryAccountShortCode from './QueryAccountShortCode'
-import QueryShortCode from './QueryShortCode'
-import RequestShortCode from './RequestShortCode'
-import AuditTrail from './AuditTrail';
+import React from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
+
+import UserService from "../services/UserService";
+
+import ComponentWithAsideBar from "./ComponentWithAsideBar";
+import Dashboard from "./Dashboard";
+import RequestShortCode from "./RequestShortCode";
+import PendingRequests from "./PendingRequests";
+import QueryShortCode from "./QueryShortCode";
+import QueryAccountShortCode from "./QueryAccountShortCode";
+import AuditTrail from "./AuditTrail";
 import DeleteShortCode from "./DeleteShortCode";
 import PendingDeleteRequests from "./PendingDeleteRequests";
 import TestShortCodeRequest from "./TestShortCodeRequest";
-import B2C from './mpesa/B2C'
-import C2B from './mpesa/C2B'
+import B2C from "./mpesa/B2C";
+import C2B from "./mpesa/C2B";
+import RenderOnRole from "./access/RenderOnRole";
+import Registry from "./Registry";
+
+
 
 function ComponetsContainer() {
   return (
     <div>
       <Routes>
-        <Route exact path="*" element={<ComponentWithAsideBar>
-          <RequestShortCode />
-        </ComponentWithAsideBar>} />
-        <Route exact path="/" element={<ComponentWithAsideBar>
+        <Route
+    path="/"
+    element={
+        UserService.hasRole(["apicaller"])
+            ? <Navigate to="/dashboard" replace />
+            : UserService.hasRole(["maker"])
+                ? <Navigate to="/request" replace />
+                : <Navigate to="/pending" replace />
+    }
+/>
+       <Route
+    path="/dashboard"
+    element={
+        <ComponentWithAsideBar>
+            <RenderOnRole roles={["apicaller"]}>
+                <Dashboard />
+            </RenderOnRole>
+        </ComponentWithAsideBar>
+    }
+/>
+
+<Route
+    path="/registry"
+    element={
+        <ComponentWithAsideBar>
+            <Registry />
+        </ComponentWithAsideBar>
+    }
+/>
+
+      <Route
+    path="/registry/:status"
+    element={
+        <ComponentWithAsideBar>
+            <Registry />
+        </ComponentWithAsideBar>
+    }
+/>
+        <Route exact path="/request" element={<ComponentWithAsideBar>
           <RequestShortCode />
         </ComponentWithAsideBar>} />
         <Route exact path="/pending" element={<ComponentWithAsideBar>
