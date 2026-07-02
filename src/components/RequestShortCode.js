@@ -103,6 +103,9 @@ function RequestShortCode() {
   const [loading, setLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('');
   const [accountLookupResponse, setAccountLookupResponse] = useState(null);
+  const [preferredShortCode, setPreferredShortCode] = useState("");
+  const [checkingShortCode, setCheckingShortCode] = useState(false);
+  const [shortCodeAvailable, setShortCodeAvailable] = useState(null);
 
   // ── Manual test state ──
   const [manualLoading, setManualLoading] = useState(false);
@@ -136,6 +139,39 @@ function RequestShortCode() {
       });
   };
 
+  const checkShortCodeAvailability = (value) => {
+
+    setPreferredShortCode(value);
+
+    // reset
+    setShortCodeAvailable(null);
+
+    if (value.length !== 6) return;
+
+    setCheckingShortCode(true);
+
+    authedAxios
+        .get(`${URLConstants.baseAPIURL}/shortcode-available/${value}`)
+        .then((response) => {
+
+            setCheckingShortCode(false);
+
+            if (response.data.available) {
+                setShortCodeAvailable(true);
+            } else {
+                setShortCodeAvailable(false);
+            }
+
+        })
+        .catch(() => {
+
+            setCheckingShortCode(false);
+            setShortCodeAvailable(false);
+
+        });
+
+};
+
   // ── Production: submit shortcode request ──
   const handleShortCodeRequest = () => {
     setLoadingMessage('Submitting shortcode request...');
@@ -155,7 +191,9 @@ function RequestShortCode() {
       initiator:     UserService.getUsername(),
       phoneNumber:   accountLookupResponse?.phoneNumber,
       sequenceNumber: 0,
-      shortCode:     0,
+      shortCode:    preferredShortCode === ""
+                        ? 0
+                        : parseInt(preferredShortCode),
     };
 
     authedAxios
@@ -183,6 +221,8 @@ function RequestShortCode() {
   const resetProduction = () => {
     setStep(1);
     setAccountLookupResponse(null);
+    setPreferredShortCode("");
+    setShortCodeAvailable(null);
   };
 
   // ── Manual test: submit directly to /initiate ──
@@ -205,7 +245,9 @@ function RequestShortCode() {
       initiator:      UserService.getUsername(),
       phoneNumber:    f.phoneNumber.value,
       sequenceNumber: 0,
-      shortCode:      0,
+      shortCode:    f.shortCode.value === ""
+                        ? 0
+                        : parseInt(f.shortCode.value),
     };
 
     authedAxios
@@ -283,12 +325,63 @@ function RequestShortCode() {
                 <DetailRow label="Customer ID"    value={accountLookupResponse?.custId} />
                 <DetailRow label="Phone Number"   value={accountLookupResponse?.phoneNumber} />
                 <DetailRow label="Email Address"  value={accountLookupResponse?.emailAddress} />
+
+                <div className="px-6 py-4 border-t border-gray-100">
+
+    <InputField
+        label="Preferred Shortcode (Optional)"
+        id="preferredShortCode"
+        value={preferredShortCode}
+        onChange={(e) => {
+
+            const numbersOnly = e.target.value.replace(/\D/g, "");
+
+            if (numbersOnly.length <= 6) {
+                checkShortCodeAvailability(numbersOnly);
+            }
+
+        }}
+        placeholder="6 digits"
+    />
+
+    <div className="mt-2">
+
+        {checkingShortCode && (
+            <p className="text-sm text-blue-600">
+                Checking availability...
+            </p>
+        )}
+
+        {!checkingShortCode &&
+            preferredShortCode.length === 6 &&
+            shortCodeAvailable === true && (
+                <p className="text-sm text-green-600">
+                    ✓ Shortcode is available.
+                </p>
+            )}
+
+        {!checkingShortCode &&
+            preferredShortCode.length === 6 &&
+            shortCodeAvailable === false && (
+                <p className="text-sm text-red-600">
+                    ✗ Shortcode already taken.
+                </p>
+            )}
+
+    </div>
+
+</div>
               </dl>
               <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex flex-col sm:flex-row gap-3">
                 <Button variant="secondary" onClick={resetProduction}>
                   ← Search Again
                 </Button>
                 <Button
+                  disabled={
+                  checkingShortCode ||
+                  preferredShortCode.length === 6 &&
+                  shortCodeAvailable === false
+                  }
                   loading={loading}
                   loadingText="Submitting..."
                   onClick={() => { setStep(3); handleShortCodeRequest(); }}
@@ -386,7 +479,20 @@ function RequestShortCode() {
                   id="emailAddress"
                   name="emailAddress"
                   type="email"
-                  placeholder="e.g. test@example.com"
+                  placeholder="e.g. john@example.com"
+                />
+                <InputField
+                  label="Preferred Shortcode (Optional)"
+                  id="shortCode"
+                  name="shortCode"
+                  value={preferredShortCode}
+                  onChange={(e) => {
+                      const value = e.target.value.replace(/\D/g, "");
+                        if (value.length <= 6) {
+                        setPreferredShortCode(value);
+                        }
+                    }}
+                  placeholder="6 digits"
                 />
               </div>
 
@@ -401,7 +507,7 @@ function RequestShortCode() {
                     { label: 'approver',       value: UserService.getUsername() || '(current user)' },
                     { label: 'initiator',      value: UserService.getUsername() || '(current user)' },
                     { label: 'id',             value: '0' },
-                    { label: 'shortCode',      value: '0' },
+                    { label: 'shortCode',      value:preferredShortCode === "" ? "Auto Generated" : preferredShortCode },
                     { label: 'sequenceNumber', value: '0' },
                   ].map(({ label, value }) => (
                     <div key={label} className="flex flex-col gap-0.5">

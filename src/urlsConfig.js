@@ -32,6 +32,10 @@ const getAccountShortCodesURL = (account) => {
     return `get-shortcodes/${account}`
 }
 
+const checkShortCodeURL = (shortCode) => {
+    return `check-shortcode/${shortCode}`;
+}
+
 const URLConstants = {
     baseAPIURL,
     baseURL,
@@ -40,6 +44,7 @@ const URLConstants = {
     pendingRequestURL,
     approveURL,
     registryURL,
+    checkShortCodeURL,
 
     deleteShortCodeURL,
     pendingDeleteURL,
