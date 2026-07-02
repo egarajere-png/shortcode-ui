@@ -12,8 +12,10 @@ import { useToast, Toast } from './ui/Toast';
 
 // Map the :status route param to the internal filter value used by the table
 const STATUS_PARAM_MAP = {
-  active:  'active',
-  deleted: 'deleted',
+  active: "active",
+  "pending-approval": "pending-approval",
+  "pending-deletion": "pending-deletion",
+  deleted: "deleted",
 };
 
 function Registry() {
@@ -41,8 +43,11 @@ function Registry() {
     setLoading(true);
     RegistryService.getRegistry()
       .then((response) => {
-        setRegistry(response.data || []);
-        setLoading(false);
+       console.log("Registry Response:");
+    console.table(response.data);
+
+    setRegistry(response.data || []);
+    setLoading(false);
       })
       .catch((error) => {
         console.error(error);
@@ -53,25 +58,55 @@ function Registry() {
 
   // ── Derived summary counts ─────────────────────────────────────
   const counts = useMemo(() => {
-    const active  = registry.filter((r) => !r.deleted).length;
-    const deleted = registry.filter((r) => r.deleted).length;
-    return { total: registry.length, active, deleted };
-  }, [registry]);
+  const active = registry.filter((r) => r.status === "Active").length;
+
+  const pendingApproval = registry.filter(
+    (r) => r.status === "Pending Approval"
+  ).length;
+
+  const pendingDeletion = registry.filter(
+    (r) => r.status === "Pending Deletion"
+  ).length;
+
+  const deleted = registry.filter(
+    (r) => r.status === "Deleted"
+  ).length;
+
+  return {
+    total: registry.length,
+    active,
+    pendingApproval,
+    pendingDeletion,
+    deleted,
+  };
+}, [registry]);
 
   // ── Apply status filter before passing to DataTable (search stays in DataTable) ──
   const statusFiltered = useMemo(() => {
-    if (statusFilter === 'active')  return registry.filter((r) => !r.deleted);
-    if (statusFilter === 'deleted') return registry.filter((r) => r.deleted);
-    return registry;
-  }, [registry, statusFilter]);
+
+  if (!statusFilter) return registry;
+
+  return registry.filter(
+    (r) =>
+      r.status
+        ?.toLowerCase()
+        .replace(/\s+/g, "-") === statusFilter
+  );
+
+}, [registry, statusFilter]);
 
   // Sync filter changes back into the URL so the route stays meaningful
   const handleStatusChange = (value) => {
-    setStatusFilter(value);
-    if (value === 'active')       navigate('/registry/active');
-    else if (value === 'deleted') navigate('/registry/deleted');
-    else                          navigate('/registry');
-  };
+
+  setStatusFilter(value);
+
+  if (value) {
+    navigate(`/registry/${value}`);
+  } else {
+    navigate("/registry");
+  }
+
+};
 
   // ── Table column definitions ───────────────────────────────────
   const columns = [
@@ -111,12 +146,15 @@ function Registry() {
       ),
     },
     {
-      key: 'deleted',
-      label: 'Status',
+      key: "status",
+      label: "Status",
       sortable: true,
       render: (row) => (
-        <StatusBadge status={row.deleted ? 'deleted' : 'active'} />
-      ),
+      <StatusBadge
+        status={row.status}
+        label={row.status}
+      />
+        ),
     },
     {
       key: 'audit',
@@ -159,43 +197,54 @@ function Registry() {
           <LoadingSkeleton variant="cards" rows={3} />
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-          <SummaryCard
-            label="Total Shortcodes"
-            value={counts.total}
-            colorClass="text-blue-700"
-            bgClass="bg-blue-50"
-            icon={
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" className="w-full h-full">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                  d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z" />
-              </svg>
-            }
-          />
-          <SummaryCard
-            label="Active"
-            value={counts.active}
-            colorClass="text-green-700"
-            bgClass="bg-green-50"
-            icon={
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" className="w-full h-full">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-            }
-          />
-          <SummaryCard
-            label="Deleted"
-            value={counts.deleted}
-            colorClass="text-red-700"
-            bgClass="bg-red-50"
-            icon={
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" className="w-full h-full">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
-            }
-          />
-        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-5 gap-4 mb-6">
+
+   <SummaryCard
+    label="Total"
+    value={counts.total}
+    colorClass="text-blue-700"
+    bgClass="bg-blue-50"
+    icon={
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+          d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z"/>
+      </svg>
+    }
+  />
+
+  <SummaryCard
+    label="Active"
+    value={counts.active}
+    colorClass="text-green-700"
+    bgClass="bg-green-50"
+    icon={<span>✓</span>}
+  />
+
+  <SummaryCard
+    label="Pending Approval"
+    value={counts.pendingApproval}
+    colorClass="text-yellow-700"
+    bgClass="bg-yellow-50"
+    icon={<span>⏳</span>}
+  />
+
+  <SummaryCard
+    label="Pending Deletion"
+    value={counts.pendingDeletion}
+    colorClass="text-orange-700"
+    bgClass="bg-orange-50"
+    icon={<span>🗑</span>}
+  />
+
+  <SummaryCard
+    label="Deleted"
+    value={counts.deleted}
+    colorClass="text-red-700"
+    bgClass="bg-red-50"
+    icon={<span>✕</span>}
+  />
+
+</div>
       )}
 
       {/* ── Toolbar: search + filter ──────────────────────────────── */}
@@ -211,10 +260,28 @@ function Registry() {
           value={statusFilter}
           onChange={handleStatusChange}
           allLabel="All Statuses"
-          options={[
-            { value: 'active',  label: 'Active',  count: counts.active },
-            { value: 'deleted', label: 'Deleted', count: counts.deleted },
-          ]}
+         options={[
+  {
+    value: "active",
+    label: "Active",
+    count: counts.active,
+  },
+  {
+    value: "pending-approval",
+    label: "Pending Approval",
+    count: counts.pendingApproval,
+  },
+  {
+    value: "pending-deletion",
+    label: "Pending Deletion",
+    count: counts.pendingDeletion,
+  },
+  {
+    value: "deleted",
+    label: "Deleted",
+    count: counts.deleted,
+  },
+]}
         />
       </div>
 
