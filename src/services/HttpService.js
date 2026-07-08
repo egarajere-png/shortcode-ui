@@ -12,6 +12,11 @@ const _axios = axios.create({
   baseURL: process.env.REACT_APP_API_BASE_URL,
 });
 
+console.log(
+    "API BASE URL =",
+    process.env.REACT_APP_API_BASE_URL
+);
+
 const configure = () => {
   _axios.interceptors.request.use((config) => {
     if (UserService.isLoggedIn()) {
