@@ -49,7 +49,9 @@ function ComponetsContainer() {
     path="/registry"
     element={
         <ComponentWithAsideBar>
+            <RenderOnRole roles={["apicaller"]}>
             <Registry />
+            </RenderOnRole>
         </ComponentWithAsideBar>
     }
 />
@@ -58,7 +60,9 @@ function ComponetsContainer() {
     path="/registry/:status"
     element={
         <ComponentWithAsideBar>
-            <Registry />
+            <RenderOnRole roles={["apicaller"]}>
+                <Registry />
+            </RenderOnRole>
         </ComponentWithAsideBar>
     }
 />

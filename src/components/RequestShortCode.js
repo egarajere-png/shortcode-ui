@@ -107,6 +107,8 @@ function RequestShortCode() {
   const [checkingShortCode, setCheckingShortCode] = useState(false);
   const [shortCodeAvailable, setShortCodeAvailable] = useState(null);
 
+  const [shortCodeMode, setShortCodeMode] = useState("AUTO");
+
   // ── Manual test state ──
   const [manualLoading, setManualLoading] = useState(false);
 
@@ -151,24 +153,22 @@ function RequestShortCode() {
     setCheckingShortCode(true);
 
     authedAxios
-        .get(`${URLConstants.baseAPIURL}/shortcode-available/${value}`)
+        .get(`${URLConstants.baseAPIURL}/check-shortcode/${value}`)
         .then((response) => {
+          setCheckingShortCode(false);
+    const data = response.data;
+    if (data.statusCode === "000") {
+        setShortCodeAvailable(true);
+    } else {
+        setShortCodeAvailable(false);
+    }
+})
+        .catch((error) => {
+          console.error(error);
+          setCheckingShortCode(false);
+          setShortCodeAvailable(false);
 
-            setCheckingShortCode(false);
-
-            if (response.data.available) {
-                setShortCodeAvailable(true);
-            } else {
-                setShortCodeAvailable(false);
-            }
-
-        })
-        .catch(() => {
-
-            setCheckingShortCode(false);
-            setShortCodeAvailable(false);
-
-        });
+});
 
 };
 
@@ -191,7 +191,7 @@ function RequestShortCode() {
       initiator:     UserService.getUsername(),
       phoneNumber:   accountLookupResponse?.phoneNumber,
       sequenceNumber: 0,
-      shortCode:    preferredShortCode === ""
+      shortCode:    shortCodeMode === "AUTO"
                         ? 0
                         : parseInt(preferredShortCode),
     };
@@ -218,12 +218,13 @@ function RequestShortCode() {
       });
   };
 
-  const resetProduction = () => {
+ const resetProduction = () => {
     setStep(1);
     setAccountLookupResponse(null);
+    setShortCodeMode("AUTO");
     setPreferredShortCode("");
     setShortCodeAvailable(null);
-  };
+};
 
   // ── Manual test: submit directly to /initiate ──
   const handleManualSubmit = (e) => {
@@ -245,9 +246,7 @@ function RequestShortCode() {
       initiator:      UserService.getUsername(),
       phoneNumber:    f.phoneNumber.value,
       sequenceNumber: 0,
-      shortCode:    f.shortCode.value === ""
-                        ? 0
-                        : parseInt(f.shortCode.value),
+      shortCode:       Number(f.shortCode.value || 0),
     };
 
     authedAxios
@@ -326,49 +325,105 @@ function RequestShortCode() {
                 <DetailRow label="Phone Number"   value={accountLookupResponse?.phoneNumber} />
                 <DetailRow label="Email Address"  value={accountLookupResponse?.emailAddress} />
 
-                <div className="px-6 py-4 border-t border-gray-100">
+    <div className="px-6 py-4 border-t border-gray-100">
 
-    <InputField
-        label="Preferred Shortcode (Optional)"
-        id="preferredShortCode"
-        value={preferredShortCode}
-        onChange={(e) => {
+    <label className="block text-sm font-semibold text-gray-700 mb-3">
+        Shortcode Type
+    </label>
 
-            const numbersOnly = e.target.value.replace(/\D/g, "");
+    <div className="flex gap-8 mb-5">
 
-            if (numbersOnly.length <= 6) {
-                checkShortCodeAvailability(numbersOnly);
-            }
+        <label className="flex items-center gap-2 cursor-pointer">
 
-        }}
-        placeholder="6 digits"
-    />
+            <input
+                type="radio"
+                checked={shortCodeMode === "AUTO"}
+                onChange={() => {
 
-    <div className="mt-2">
+                    setShortCodeMode("AUTO");
+                    setPreferredShortCode("");
+                    setShortCodeAvailable(null);
 
-        {checkingShortCode && (
-            <p className="text-sm text-blue-600">
-                Checking availability...
-            </p>
-        )}
+                }}
+            />
 
-        {!checkingShortCode &&
-            preferredShortCode.length === 6 &&
-            shortCodeAvailable === true && (
-                <p className="text-sm text-green-600">
-                    ✓ Shortcode is available.
-                </p>
-            )}
+            <span>Generate Sequential Shortcode</span>
 
-        {!checkingShortCode &&
-            preferredShortCode.length === 6 &&
-            shortCodeAvailable === false && (
-                <p className="text-sm text-red-600">
-                    ✗ Shortcode already taken.
-                </p>
-            )}
+        </label>
+
+        <label className="flex items-center gap-2 cursor-pointer">
+
+            <input
+                type="radio"
+                checked={shortCodeMode === "CUSTOM"}
+                onChange={() => {
+
+                    setShortCodeMode("CUSTOM");
+
+                }}
+            />
+
+            <span>Choose Custom Shortcode</span>
+
+        </label>
 
     </div>
+
+    {shortCodeMode === "CUSTOM" && (
+
+        <>
+
+            <InputField
+                label="Preferred Shortcode"
+                id="preferredShortCode"
+                value={preferredShortCode}
+                onChange={(e) => {
+
+                    const value = e.target.value.replace(/\D/g, "");
+
+                    if (value.length <= 6) {
+                        checkShortCodeAvailability(value);
+                    }
+
+                }}
+                placeholder="Enter 6 digit shortcode"
+            />
+
+            <div className="mt-2">
+
+                {checkingShortCode && (
+
+                    <p className="text-blue-600 text-sm">
+                        Checking availability...
+                    </p>
+
+                )}
+
+                {!checkingShortCode &&
+                    preferredShortCode.length === 6 &&
+                    shortCodeAvailable === true && (
+
+                        <p className="text-green-600 text-sm">
+                            ✓ Shortcode Available
+                        </p>
+
+                )}
+
+                {!checkingShortCode &&
+                    preferredShortCode.length === 6 &&
+                    shortCodeAvailable === false && (
+
+                        <p className="text-red-600 text-sm">
+                            ✗ Shortcode is reserved or Already Taken
+                        </p>
+
+                )}
+
+            </div>
+
+        </>
+
+    )}
 
 </div>
               </dl>
@@ -378,9 +433,14 @@ function RequestShortCode() {
                 </Button>
                 <Button
                   disabled={
+                  loading ||
+                  (
+                  shortCodeMode === "CUSTOM" && (
                   checkingShortCode ||
-                  preferredShortCode.length === 6 &&
-                  shortCodeAvailable === false
+                  preferredShortCode.length !== 6 ||
+                  shortCodeAvailable !== true
+                  )
+                  )
                   }
                   loading={loading}
                   loadingText="Submitting..."
@@ -402,9 +462,18 @@ function RequestShortCode() {
               </div>
               <h2 className="text-lg font-bold text-gray-900 mb-2">Request Submitted</h2>
               <p className="text-sm text-gray-500 mb-6">
-                The shortcode request for{' '}
-                <span className="font-semibold text-gray-700">{accountLookupResponse?.accountName}</span>{' '}
-                has been submitted and is pending checker approval.
+                        The
+                      <span className="font-semibold">
+                                {shortCodeMode === "AUTO"
+                                  ? " Sequential "
+                         : " Custom "}
+                      </span>
+                    shortcode request for
+                  <span className="font-semibold text-gray-700">
+                    {" "}
+                    {accountLookupResponse?.accountName}
+                  </span>
+                {" "}has been submitted and is pending checker approval.
               </p>
               <Button onClick={resetProduction} variant="secondary">
                 Submit Another Request
