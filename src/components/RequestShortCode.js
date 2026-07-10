@@ -347,7 +347,7 @@ function RequestShortCode() {
                 }}
             />
 
-            <span>Generate Sequential Shortcode</span>
+            <span>System Generated Shortcode</span>
 
         </label>
 

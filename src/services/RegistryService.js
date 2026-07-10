@@ -3,11 +3,11 @@ import HttpService from "./HttpService";
 const client = HttpService.getAxiosClient();
 
 const getRegistry = () => {
-    return client.get("/registry");
+  return client.get("/registry");
 };
 
 const RegistryService = {
-    getRegistry,
+  getRegistry,
 };
 
 export default RegistryService;

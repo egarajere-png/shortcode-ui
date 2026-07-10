@@ -22,8 +22,11 @@ const initKeycloak = (onAuthenticatedCallback) => {
 
 const doLogin = () => _kc.login();
 
-const doLogout = () => _kc.logout();
-
+const doLogout = () =>
+    _kc.logout({
+        redirectUri: window.location.origin
+    });
+    
 const getToken = () => _kc.token;
 
 const isLoggedIn = () => !!_kc.token;
