@@ -185,10 +185,52 @@ function Registry() {
         title="Shortcode Registry"
         subtitle="Master list of all approved shortcodes and their linked accounts"
         action={
-          <span className="text-xs text-gray-400">
-            {counts.total} total record{counts.total !== 1 ? 's' : ''}
-          </span>
-        }
+  <div className="flex items-center gap-2">
+    <button
+      onClick={() => RegistryService.exportRegistryExcel()}
+      className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors"
+    >
+      <svg
+        className="w-4 h-4"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M12 16v-8m0 8l-3-3m3 3l3-3M5 20h14"
+        />
+      </svg>
+      Excel
+    </button>
+
+    <button
+      onClick={() => window.location.reload()}
+      className="inline-flex items-center gap-2 px-3 py-2 text-sm text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+    >
+      <svg
+        className="w-4 h-4"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+        />
+      </svg>
+      Refresh
+    </button>
+
+    <span className="text-xs text-gray-400 ml-2">
+      {counts.total} total record{counts.total !== 1 ? "s" : ""}
+    </span>
+  </div>
+}
       />
 
       {/* ── Summary cards ──────────────────────────────────────── */}

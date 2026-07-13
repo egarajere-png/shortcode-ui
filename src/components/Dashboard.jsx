@@ -313,15 +313,6 @@ function Dashboard() {
                 iconBg="bg-red-50"
                 iconColor="text-red-600"
               />
-              <QuickActionCard
-                label="Test Request"
-                to="/test-request"
-                icon={Icon.test}
-                iconBg="bg-purple-50"
-                iconColor="text-purple-600"
-                badge="Dev"
-                badgeColor="bg-purple-100 text-purple-700"
-              />
             </div>
           </div>
         </RenderOnRole>

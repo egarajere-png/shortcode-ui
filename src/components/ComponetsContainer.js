@@ -12,7 +12,6 @@ import QueryAccountShortCode from "./QueryAccountShortCode";
 import AuditTrail from "./AuditTrail";
 import DeleteShortCode from "./DeleteShortCode";
 import PendingDeleteRequests from "./PendingDeleteRequests";
-import TestShortCodeRequest from "./TestShortCodeRequest";
 import B2C from "./mpesa/B2C";
 import C2B from "./mpesa/C2B";
 import RenderOnRole from "./access/RenderOnRole";
@@ -86,9 +85,6 @@ function ComponetsContainer() {
         </ComponentWithAsideBar>} />
         <Route path="/pending-delete" element={ <ComponentWithAsideBar>
             <PendingDeleteRequests />
-        </ComponentWithAsideBar>} />
-        <Route path="/test-request" element={ <ComponentWithAsideBar>
-          <TestShortCodeRequest />
         </ComponentWithAsideBar>} />
         <Route exact path="/c2b" element={<ComponentWithAsideBar>
           <C2B />

@@ -202,8 +202,39 @@ function ApprovalModal({ item, onClose, onSuccess, onError }) {
   const [loading, setLoading]             = useState(false);
   const [downloadReady, setDownloadReady] = useState(false);
   const [shortCodeResponse, setShortCodeResponse] = useState(null);
+
+  const [checking, setChecking] = useState(true);
+  const [availability, setAvailability] = useState(null);
+
   const authedAxios = HttpService.getAxiosClient();
   const navigate = useNavigate();
+
+  useEffect(() => {
+
+  if (!item?.shortCode) {
+    setChecking(false);
+    return;
+  }
+
+  setChecking(true);
+
+  authedAxios
+    .get(
+      `${URLConstants.baseAPIURL}/${URLConstants.checkShortCodeURL(item.shortCode)}`
+    )
+    .then((response) => {
+      setAvailability(response.data);
+      setChecking(false);
+    })
+    .catch(() => {
+      setAvailability({
+        available: false,
+        message: "Unable to verify shortcode."
+      });
+      setChecking(false);
+    });
+
+}, [item, authedAxios]);
 
   const approve = () => {
     if (loading) return;
@@ -247,13 +278,20 @@ function ApprovalModal({ item, onClose, onSuccess, onError }) {
     );
   };
 
+
+  const canApprove =
+  availability &&
+  availability.available;
+
   return (
     <ConfirmationModal
       isOpen
       onClose={onClose}
-      onConfirm={approve}
+      onConfirm={canApprove ? approve : undefined}
       title="Approve Shortcode Request"
-      confirmLabel="Approve Request"
+      confirmLabel={ canApprove
+      ? "Approve Request"
+      : "Cannot Approve"}
       confirmVariant="primary"
       loading={loading}
       loadingLabel="Approving..."
@@ -267,6 +305,7 @@ function ApprovalModal({ item, onClose, onSuccess, onError }) {
           {[
             { label: 'Account Name', value: item.accountName },
             { label: 'Account Number', value: item.accountNumber },
+            { label: 'Requested Shortcode', value: item.shortCode },
             { label: 'Initiated By', value: item.initiator },
           ].map(({ label, value }) => (
             <div key={label} className="flex items-center px-4 py-3 bg-white even:bg-gray-50">
@@ -275,6 +314,75 @@ function ApprovalModal({ item, onClose, onSuccess, onError }) {
             </div>
           ))}
         </dl>
+        <div className="rounded-lg border p-4 mt-4">
+
+  <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">
+    Shortcode Availability
+  </p>
+
+  {checking ? (
+
+    <div className="flex items-center gap-2 text-gray-500 text-sm">
+
+      <svg
+        className="animate-spin w-4 h-4"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <circle
+          className="opacity-25"
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          strokeWidth="4"
+        />
+        <path
+          className="opacity-75"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8v8H4z"
+        />
+      </svg>
+
+      Checking shortcode...
+
+    </div>
+
+  ) : availability?.available ? (
+
+    <div className="flex items-center gap-2">
+
+      <span className="h-3 w-3 rounded-full bg-green-500"></span>
+
+      <span className="font-medium text-green-700">
+        Available
+      </span>
+
+    </div>
+
+  ) : (
+
+    <div className="flex items-center gap-2">
+
+      <span className="h-3 w-3 rounded-full bg-red-500"></span>
+
+      <div>
+
+        <p className="font-medium text-red-700">
+          Not Available
+        </p>
+
+        <p className="text-xs text-red-500">
+          {availability?.message}
+        </p>
+
+      </div>
+
+    </div>
+
+  )}
+
+</div>
 
         {/* Receipt download — secondary action.
             Email is sent automatically by the backend on approval;

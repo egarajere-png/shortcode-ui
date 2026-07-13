@@ -53,7 +53,9 @@ const URLConstants = {
     getShortCodeAccountDetailsURL,
     shortCodeAccountURL,
     getReceiptURL,
-    getAccountShortCodesURL
+    getAccountShortCodesURL,
+
+    exportExcelURL: "registry/export/excel"
 }
 export default URLConstants
 

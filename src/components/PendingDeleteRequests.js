@@ -183,21 +183,62 @@ function PendingDeleteRequests() {
                 d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
             </svg>
             <p className="text-sm text-red-700 font-medium">
-              This will permanently deactivate the shortcode. This action cannot be undone.
+                Please review the deletion request carefully before approving. Once approved, the shortcode will be permanently deactivated and cannot be recovered.
             </p>
           </div>
-          <dl className="divide-y divide-gray-100 border border-gray-100 rounded-lg overflow-hidden">
-            {[
-              { label: 'Account Name', value: selectedItem?.accountName },
-              { label: 'Account No.', value: selectedItem?.accountNumber },
-              { label: 'Shortcode', value: selectedItem?.shortCode },
-            ].map(({ label, value }) => (
-              <div key={label} className="flex items-center px-4 py-3 bg-white even:bg-gray-50">
-                <dt className="text-xs font-semibold text-gray-400 uppercase tracking-wider w-32 flex-shrink-0">{label}</dt>
-                <dd className="text-sm font-medium text-gray-900 font-mono">{value}</dd>
-              </div>
-            ))}
-          </dl>
+         <dl className="divide-y divide-gray-100 border border-gray-100 rounded-lg overflow-hidden">
+
+  {[
+    {
+      label: "Account Name",
+      value: selectedItem?.accountName,
+    },
+    {
+      label: "Account Number",
+      value: selectedItem?.accountNumber,
+    },
+    {
+      label: "Shortcode",
+      value: selectedItem?.shortCode,
+    },
+    {
+      label: "Requested By",
+      value: selectedItem?.initiator,
+    },
+    {
+      label: "Requested On",
+      value: selectedItem?.dateInitiated
+        ? new Date(selectedItem.dateInitiated).toLocaleString()
+        : "-",
+    },
+  ].map(({ label, value }) => (
+    <div
+      key={label}
+      className="flex flex-col sm:flex-row px-4 py-3 bg-white even:bg-gray-50"
+    >
+      <dt className="text-xs font-semibold uppercase tracking-wider text-gray-400 sm:w-40 flex-shrink-0">
+        {label}
+      </dt>
+
+      <dd className="text-sm font-medium text-gray-900 break-words">
+        {value}
+      </dd>
+    </div>
+  ))}
+
+</dl>
+
+<div className="border border-red-200 bg-red-50 rounded-lg p-4">
+
+  <p className="text-xs font-semibold uppercase tracking-wider text-red-600 mb-2">
+    Deletion Reason
+  </p>
+
+  <p className="text-sm text-gray-800 whitespace-pre-wrap">
+    {selectedItem?.deleteRemark || "No reason provided"}
+  </p>
+
+</div>
         </div>
       </ConfirmationModal>
     </div>

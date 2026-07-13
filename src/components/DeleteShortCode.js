@@ -15,16 +15,43 @@ function DeleteShortCode() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [formData, setFormData] = useState(null);
 
+  const [reason, setReason] = useState("");
+  const [otherReason, setOtherReason] = useState("");
+
   // Capture form values into state, then show confirm modal
-  const handleFormSubmit = (e) => {
+const handleFormSubmit = (e) => {
     e.preventDefault();
+
+    const shortCode = e.target.shortCode.value;
+
+    if (!/^\d{6}$/.test(shortCode)) {
+    toast.error(
+        "Shortcode must contain exactly 6 digits.",
+        "Validation Error"
+    );
+    return;
+}
+
+    if (reason === "Other" && otherReason.trim() === "") {
+        toast.error(
+            "Please specify the deletion reason.",
+            "Validation Error"
+        );
+        return;
+    }
+
     setFormData({
-      accountNumber: e.target.accountNumber.value,
-      shortCode: parseInt(e.target.shortCode.value),
-      deleteRemark: e.target.remark.value,
+        accountNumber: e.target.accountNumber.value,
+        shortCode: parseInt(shortCode),
+        deleteRemark:
+            reason === "Other"
+                ? otherReason.trim()
+                : reason,
     });
+
+    // ADD THIS BACK
     setShowConfirm(true);
-  };
+};
 
   const handleConfirmedDelete = () => {
     setLoading(true);
@@ -86,21 +113,52 @@ function DeleteShortCode() {
               required
             />
             <InputField
-              label="Short Code"
-              id="shortCode"
-              name="shortCode"
-              type="number"
-              placeholder="Enter shortcode to delete"
-              required
+               label="Short Code"
+               id="shortCode"
+               name="shortCode"
+               type="text"
+               inputMode="numeric"
+               maxLength={6}
+               placeholder="Enter shortcode to delete"
+               min="100000"
+               max="999999"
+               required
             />
-            <TextareaField
-              label="Reason for Deletion"
-              id="remark"
-              name="remark"
-              placeholder="Provide a clear reason for this deletion request..."
-              rows={3}
-              required
-            />
+           <div>
+  <label className="block text-sm font-medium text-gray-700 mb-1">
+    Reason for Deletion
+  </label>
+
+  <select
+    id="reason"
+    name="reason"
+    className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-red-500"
+    required
+    onChange={(e) => setReason(e.target.value)}
+  >
+    <option value="">Select reason...</option>
+
+    <option>Customer requested cancellation</option>
+    <option>Duplicate shortcode created</option>
+    <option>Incorrect account mapping</option>
+    <option>Customer account closed</option>
+    <option>Fraud / Security concern</option>
+    <option>System generated in error</option>
+    <option>Migration / Account consolidation</option>
+    <option value="Other">Other</option>
+  </select>
+  {reason === "Other" && (
+    <TextareaField
+        label="Please specify"
+        id="otherReason"
+        name="otherReason"
+        rows={3}
+        required
+        value={otherReason}
+        onChange={(e) => setOtherReason(e.target.value)}
+    />
+)}
+</div>
             <div className="pt-2">
               <Button type="submit" variant="danger" size="lg" fullWidth>
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -140,7 +198,7 @@ function DeleteShortCode() {
             {[
               { label: 'Account Number', value: formData?.accountNumber },
               { label: 'Short Code', value: formData?.shortCode },
-              { label: 'Reason', value: formData?.deleteRemark },
+              { label: 'Deletion Reason', value: formData?.deleteRemark },
             ].map(({ label, value }) => (
               <div key={label} className="flex flex-col sm:flex-row px-4 py-3 gap-1 bg-white even:bg-gray-50">
                 <dt className="text-xs font-semibold uppercase tracking-wider text-gray-400 sm:w-36 flex-shrink-0">{label}</dt>
