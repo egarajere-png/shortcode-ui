@@ -8,10 +8,6 @@ import RenderOnRole from './access/RenderOnRole';
 import DashboardSection  from './ui/DashboardSection';
 import AnalyticsCard     from './ui/AnalyticsCard';
 import QuickActionCard   from './ui/QuickActionCard';
-import ActivityTimeline  from './ui/ActivityTimeline';
-import NotificationBell  from './ui/NotificationBell';
-import MiniBarChart      from './ui/MiniBarChart';
-import SystemHealthCard  from './ui/SystemHealthCard';
 import DashboardService from "../services/DashboardService";
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
@@ -291,6 +287,7 @@ function Dashboard() {
           </span>
         }
       >
+      <div className="grid md:grid-cols-2 gap-8 mb-5">
         {/* Maker actions */}
         <RenderOnRole roles={['maker']}>
           <div className="mb-3">
@@ -298,7 +295,7 @@ function Dashboard() {
               text-gray-300 mb-2 ml-0.5">
               Maker
             </p>
-            <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3">
+            <div className="flex gap-4 flex-wrap">
               <QuickActionCard
                 label="Request Shortcode"
                 to="/request"
@@ -324,7 +321,7 @@ function Dashboard() {
               text-gray-300 mb-2 ml-0.5">
               Checker
             </p>
-            <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3">
+            <div className="flex gap-4 flex-wrap">
               <QuickActionCard
                 label="Pending Approvals"
                 to="/pending"
@@ -347,13 +344,15 @@ function Dashboard() {
           </div>
         </RenderOnRole>
 
+        </div>
+
         {/* Shared actions — all roles */}
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-widest
             text-gray-300 mb-2 ml-0.5">
             Query & Audit
           </p>
-          <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <QuickActionCard
               label="Query Shortcode"
               to="/query"
@@ -386,150 +385,11 @@ function Dashboard() {
         </div>
       </DashboardSection>
 
-      {/* ── Main content grid ─────────────────────────────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        {/* Activity timeline — spans 2 cols */}
-        <div className="lg:col-span-2">
-          <ActivityTimeline />
-        </div>
-
-        {/* Notifications preview */}
-        <div>
-          <NotificationsPanel />
-        </div>
-      </div>
-
       {/* ── Bottom grid: chart + health ───────────────────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <MiniBarChart />
-        <SystemHealthCard />
-      </div>
+      
     </div>    
   );
 }
 
-// ─── Notifications panel (inline preview widget) ──────────────────────────────
-const PANEL_NOTIFICATIONS = [
-  {
-    id: 1,
-    type: 'approval',
-    title: 'Shortcode Awaiting Approval',
-    body: 'Request for Equity Traders Sacco is pending review.',
-    time: '5 min ago',
-    read: false,
-  },
-  {
-    id: 2,
-    type: 'approved',
-    title: 'Shortcode Approved',
-    body: 'Shortcode 350001 for KCB Holdings Ltd approved.',
-    time: '22 min ago',
-    read: false,
-  },
-  {
-    id: 3,
-    type: 'deletion',
-    title: 'Deletion Request Pending',
-    body: 'Deletion for shortcode 350120 awaits checker approval.',
-    time: '1 hr ago',
-    read: false,
-  },
-  {
-    id: 4,
-    type: 'system',
-    title: 'Scheduled Maintenance',
-    body: 'Maintenance scheduled Saturday 29 Jun at 02:00 EAT.',
-    time: '3 hr ago',
-    read: true,
-  },
-];
-
-const NOTIF_TYPE = {
-  approval: { dot: 'bg-amber-500', bg: 'bg-amber-50', text: 'text-amber-700' },
-  approved: { dot: 'bg-green-500', bg: 'bg-green-50', text: 'text-green-700' },
-  deletion: { dot: 'bg-red-500',   bg: 'bg-red-50',   text: 'text-red-700'   },
-  system:   { dot: 'bg-blue-500',  bg: 'bg-blue-50',  text: 'text-blue-700'  },
-};
-
-function NotificationsPanel() {
-  const [items, setItems] = useState(PANEL_NOTIFICATIONS);
-  const unread = items.filter((n) => !n.read).length;
-
-  const markAllRead = useCallback(() => {
-    setItems((prev) => prev.map((n) => ({ ...n, read: true })));
-  }, []);
-
-  return (
-    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden h-full flex flex-col">
-      {/* Header */}
-      <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 flex-shrink-0">
-        <div>
-          <h3 className="text-sm font-semibold text-gray-900">Notifications</h3>
-          <p className="text-xs text-gray-400 mt-0.5">
-            {unread > 0 ? `${unread} unread` : 'All caught up'}
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          {unread > 0 && (
-            <span className="w-5 h-5 flex items-center justify-center text-[10px]
-              font-bold text-white bg-red-500 rounded-full">
-              {unread}
-            </span>
-          )}
-          {unread > 0 && (
-            <button
-              onClick={markAllRead}
-              className="text-xs text-blue-600 hover:text-blue-800
-                hover:underline transition-colors font-medium"
-            >
-              Mark all read
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* List */}
-      <div className="flex-1 overflow-y-auto divide-y divide-gray-50">
-        {items.map((item) => {
-          const cfg = NOTIF_TYPE[item.type] || NOTIF_TYPE.system;
-          return (
-            <div
-              key={item.id}
-              onClick={() => setItems((prev) =>
-                prev.map((n) => n.id === item.id ? { ...n, read: true } : n)
-              )}
-              className={`flex gap-3 px-5 py-3.5 cursor-pointer transition-colors
-                hover:bg-gray-50 ${!item.read ? 'bg-blue-50/30' : ''}`}
-            >
-              {/* Dot indicator */}
-              <div className="pt-1 flex-shrink-0">
-                <span className={`w-2 h-2 rounded-full block flex-shrink-0
-                  ${item.read ? 'bg-gray-200' : cfg.dot}`} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className={`text-xs font-semibold leading-tight
-                  ${item.read ? 'text-gray-500' : 'text-gray-900'}`}>
-                  {item.title}
-                </p>
-                <p className="text-[11px] text-gray-500 mt-0.5 leading-relaxed line-clamp-2">
-                  {item.body}
-                </p>
-                <p className="text-[10px] text-gray-400 mt-1">{item.time}</p>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Footer */}
-      <div className="px-5 py-3 bg-gray-50 border-t border-gray-100 flex-shrink-0">
-        <p className="text-[11px] text-gray-400 text-center">
-          Mocked data ·{' '}
-          <span className="text-blue-500">Connect notification API</span>
-        </p>
-      </div>
-    </div>
-  );
-}
 
 export default Dashboard;

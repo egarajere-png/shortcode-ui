@@ -11,9 +11,9 @@ class RegistryService {
         );
     }
 
-    exportRegistryExcel() {
+    exportRegistryExcel(status = "") {
         authedAxios({
-            url: `${URLConstants.baseAPIURL}/registry/export/excel`,
+            url: `${URLConstants.baseAPIURL}/registry/export/excel?status=${status}`,
             method: "GET",
             responseType: "blob",
         }).then((response) => {

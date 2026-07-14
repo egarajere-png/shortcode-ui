@@ -108,6 +108,31 @@ function Registry() {
 
 };
 
+// Label shown on the Excel export button
+const exportLabel = useMemo(() => {
+
+  if (!statusFilter) return "Full Registry";
+
+  switch (statusFilter) {
+
+    case "active":
+      return "Active Registry";
+
+    case "pending-approval":
+      return "Pending Approval Registry";
+
+    case "pending-deletion":
+      return "Pending Deletion Registry";
+
+    case "deleted":
+      return "Deleted Registry";
+
+    default:
+      return "Full Registry";
+  }
+
+}, [statusFilter]);
+
   // ── Table column definitions ───────────────────────────────────
   const columns = [
     {
@@ -187,24 +212,26 @@ function Registry() {
         action={
   <div className="flex items-center gap-2">
     <button
-      onClick={() => RegistryService.exportRegistryExcel()}
-      className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors"
-    >
-      <svg
-        className="w-4 h-4"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M12 16v-8m0 8l-3-3m3 3l3-3M5 20h14"
-        />
-      </svg>
-      Excel
-    </button>
+  onClick={() => RegistryService.exportRegistryExcel(statusFilter)}
+  className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors"
+>
+  <svg
+    className="w-4 h-4"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M12 16v-8m0 8l-3-3m3 3l3-3M5 20h14"
+    />
+  </svg>
+
+  Download {exportLabel}
+
+</button>
 
     <button
       onClick={() => window.location.reload()}
